@@ -1,0 +1,1474 @@
+﻿
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#103b35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Quản Lý Đóng Góp Khởi Nghiệp</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-soft: #f6faf7;
+      --surface-tint: #eef5f1;
+      --ink: #152521;
+      --muted: #66756f;
+      --line: #d8e6de;
+      --brand: #103b35;
+      --brand-2: #1d5a52;
+      --accent: #d3a047;
+      --accent-2: #c26d52;
+      --danger: #b2534d;
+      --partner-a: #1d5a52;
+      --partner-b: #b9842f;
+      --shadow: 0 18px 44px rgba(16, 59, 53, 0.08);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top right, rgba(211, 160, 71, 0.16), transparent 20%),
+        radial-gradient(circle at bottom left, rgba(29, 90, 82, 0.10), transparent 24%),
+        linear-gradient(180deg, #f6f7f4 0%, #edf3ef 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    body.modal-open,
+    body.entry-modal-open {
+      overflow: hidden;
+    }
+
+    .app { max-width: 1240px; margin: 0 auto; display: grid; gap: 20px; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .tabbar,
+    .view-switch {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .tab-btn,
+    .view-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.78);
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: none;
+    }
+    .tab-btn.is-active,
+    .view-btn.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      border-color: transparent;
+      box-shadow: 0 10px 18px rgba(16, 59, 53, 0.14);
+    }
+    .tab-panel[hidden] {
+      display: none !important;
+    }
+    .hero, .layout, .charts { display: grid; gap: 18px; }
+    .hero { grid-template-columns: 1.7fr 1fr; }
+    .layout { grid-template-columns: 340px minmax(0, 1fr); gap: 20px; }
+    .charts { grid-template-columns: 1.1fr 0.9fr; margin-top: 18px; }
+
+    .hero-main, .hero-side, .panel, .sheet-card, .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main {
+      padding: 28px;
+      background:
+        radial-gradient(circle at top right, rgba(211, 160, 71, 0.22), transparent 28%),
+        linear-gradient(135deg, rgba(16, 59, 53, 0.98), rgba(29, 90, 82, 0.95));
+      color: #f7fbf8;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -60px;
+      top: -50px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-side, .panel, .sheet-card, .modal-card { padding: 22px; }
+    .hero-side {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%);
+    }
+
+    .eyebrow, .section-kicker, .mini-label, .metric span, .summary-box span, .hero-stat span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow { margin: 0 0 10px; color: rgba(247, 251, 248, 0.72); }
+    .section-kicker, .mini-label { color: var(--muted); }
+
+    .hero-main h1 { margin: 0; font-size: clamp(28px, 4vw, 46px); line-height: 1.02; letter-spacing: -0.03em; }
+    .hero-main p, .subtle, .section-top p, .history-item p, .modal-card p { margin: 8px 0 0; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .hero-main p { margin-top: 14px; max-width: 760px; color: rgba(247, 251, 248, 0.82); font-size: 15px; }
+
+    .hero-stats, .summary-grid, .partner-grid, .partner-detail-grid, .grid-two, .filter-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-stats { margin-top: 22px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .summary-grid { margin-top: 18px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .partner-grid { margin-top: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-two, .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .partner-detail-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+
+    .hero-stat, .summary-box, .metric, .category-item, .history-item, .chart-card, .partner-card, .balance-row, .sheet-card {
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .hero-stat {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.10);
+      border-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-stat strong, .summary-box strong { display: block; margin-top: 8px; }
+    .hero-stat span { color: rgba(247, 251, 248, 0.68); }
+    .hero-stat strong { font-size: 23px; color: #fff; }
+    .hero-stat.is-danger strong { color: #ffd7d3; }
+
+    .summary-box, .metric, .category-item, .history-item, .chart-card, .partner-card, .balance-row, .sheet-card { padding: 16px; }
+    .summary-box strong { font-size: 24px; line-height: 1.1; }
+    .summary-box {
+      background: linear-gradient(180deg, #fbfdfc 0%, #f4faf7 100%);
+    }
+
+    .quick-balance, .sidebar, .main, .category-list, .history-list { display: grid; gap: 12px; }
+    .sidebar, .main { gap: 20px; align-content: start; }
+    .balance-row, .section-top, .partner-head, .category-top, .history-top, .history-actions, .actions, .modal-actions, .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .section-top { align-items: end; }
+    .balance-row strong { font-size: 18px; }
+    h2, h3 { margin: 0; font-size: 20px; line-height: 1.2; }
+    label { display: grid; gap: 8px; margin-top: 14px; font-size: 13px; font-weight: 700; }
+    input, select, textarea, button { font: inherit; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(29, 90, 82, 0.45); box-shadow: 0 0 0 4px rgba(29, 90, 82, 0.08); }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 18px;
+      cursor: pointer;
+      transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--brand); color: #fff; font-weight: 700; box-shadow: 0 10px 18px rgba(16, 59, 53, 0.14); }
+    .btn-secondary { background: #edf4f1; color: var(--brand); font-weight: 700; }
+    .btn-danger { background: #fbeceb; color: var(--danger); font-weight: 700; }
+
+    .actions { margin-top: 18px; flex-wrap: wrap; justify-content: flex-start; }
+    .status { margin-top: 14px; min-height: 20px; color: var(--brand-2); font-size: 14px; }
+
+    .partner-card {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+      display: grid;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .partner-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -30px -50px auto;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(211, 160, 71, 0.12), transparent 65%);
+      pointer-events: none;
+    }
+
+    .partner-card[data-tone="0"] { box-shadow: inset 0 4px 0 var(--partner-a); }
+    .partner-card[data-tone="1"] { box-shadow: inset 0 4px 0 var(--partner-b); }
+    .partner-name { font-size: 24px; font-weight: 700; line-height: 1.1; }
+    .partner-percent { padding: 7px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #eef5f3; color: var(--brand); }
+    .partner-big { font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
+    .partner-sub { color: var(--muted); font-size: 14px; }
+
+    .progress, .bar-track { height: 12px; border-radius: 999px; background: #e8efeb; overflow: hidden; }
+    .bar-track { height: 10px; margin-top: 10px; }
+    .progress > div, .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--brand-2)); }
+    .metric strong { display: block; margin-top: 7px; font-size: 17px; line-height: 1.3; }
+
+    .chart-card {
+      background: linear-gradient(180deg, #fcfefd 0%, #f3f9f6 100%);
+    }
+
+    .chart-card svg { display: block; width: 100%; height: auto; margin-top: 14px; }
+    .legend, .history-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .tag { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; background: #eef4f2; color: var(--brand); font-size: 12px; font-weight: 700; }
+    .amount { font-size: 22px; font-weight: 800; }
+    .empty { margin-top: 18px; padding: 18px; border-radius: 16px; border: 1px dashed #cbd9d2; background: #fbfcfb; color: var(--muted); text-align: center; }
+    .footer-note { margin-top: 18px; color: var(--muted); font-size: 13px; }
+    .history-actions { justify-content: flex-end; flex-wrap: wrap; }
+    .history-actions button { padding: 10px 14px; }
+    .history-meta-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+    .filter-count { color: var(--muted); font-size: 14px; }
+
+    .fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      font-size: 32px;
+      line-height: 1;
+      box-shadow: 0 18px 30px rgba(15, 58, 53, 0.22);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+    }
+
+    .entry-shell-header { display: none; }
+    .close-icon { background: transparent; color: var(--brand); font-size: 28px; padding: 0 4px; box-shadow: none; }
+
+    .overlay,
+    .toast {
+      position: fixed;
+      z-index: 40;
+    }
+
+    .overlay {
+      inset: 0;
+      background: rgba(20, 35, 32, 0.46);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .overlay.is-open { display: flex; }
+    .modal-card { max-width: 460px; width: 100%; }
+    .modal-actions { justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+    .modal-input { margin-top: 18px; }
+    .modal-error { min-height: 20px; color: var(--danger); font-size: 14px; margin-top: 10px; }
+
+    .toast {
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(120px);
+      min-width: min(92vw, 420px);
+      background: rgba(20, 35, 32, 0.96);
+      color: #fff;
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 16px 30px rgba(20, 35, 32, 0.24);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .toast.is-open {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .toast button { padding: 8px 12px; background: rgba(255,255,255,0.12); color: #fff; width: auto; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .hero, .layout, .charts { grid-template-columns: 1fr; }
+      .summary-grid, .partner-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .main > .panel:nth-of-type(2) { order: 3; }
+      .main > .panel:nth-of-type(3) { order: 2; }
+      body { padding: 14px; }
+      .hero-stats, .summary-grid, .partner-grid, .partner-detail-grid, .grid-two, .filter-grid { grid-template-columns: 1fr; }
+      .section-top, .category-top, .history-top, .partner-head, .balance-row, .history-actions, .actions, .sheet-head { flex-direction: column; align-items: flex-start; }
+      .main { order: 1; }
+      .sidebar { order: 2; }
+      .settings-panel { margin-bottom: 90px; }
+      .entry-panel { display: none; }
+      .fab { display: inline-flex; }
+      .entry-shell-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      body.entry-modal-open .entry-panel {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 35;
+        margin: 0;
+        padding: 18px;
+        border-radius: 0;
+        background: rgba(20, 35, 32, 0.46);
+      }
+      body.entry-modal-open .entry-panel .sheet-card {
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+        background: #fff;
+      }
+      .modal-card { padding: 20px; }
+      button { width: 100%; }
+      .history-actions button, .toast button { width: auto; }
+      .toast { min-width: calc(100vw - 28px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="tabbar" id="tabbar">
+        <button class="tab-btn is-active" type="button" data-tab="dashboard">Tổng quan</button>
+        <button class="tab-btn" type="button" data-tab="history">Lịch sử</button>
+        <button class="tab-btn" type="button" data-tab="categories">Hạng mục</button>
+        <button class="tab-btn" type="button" data-tab="entry">Nhập liệu</button>
+        <button class="tab-btn" type="button" data-tab="settings">Cài đặt</button>
+      </div>
+      <div class="view-switch" id="viewSwitch">
+        <button class="view-btn is-active" type="button" data-view="all">Xem tất cả</button>
+        <button class="view-btn" type="button" data-view="p1">View Người 1</button>
+        <button class="view-btn" type="button" data-view="p2">View Người 2</button>
+      </div>
+    </div>
+    <section class="hero">
+      <div class="hero-main">
+        <p class="eyebrow">Dashboard đóng góp</p>
+        <h1>Theo dõi rõ tiền đã bỏ vào và phần còn thiếu của từng người.</h1>
+        <p>Mỗi khoản chi cho quảng cáo, nhân sự hay vận hành đều được cộng vào phần đóng góp của người thực hiện. Mục tiêu mặc định là 150.000.000 VND cho mỗi người.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><span>Mục tiêu mỗi người</span><strong id="heroGoal">150.000.000 VND</strong></div>
+          <div class="hero-stat"><span>Tổng đã đóng</span><strong id="heroRaised">0 VND</strong></div>
+          <div class="hero-stat"><span>Tổng còn thiếu</span><strong id="heroRemaining">300.000.000 VND</strong></div>
+          <div class="hero-stat" id="deadlineStat"><span>Thời hạn</span><strong id="deadlineText">Chưa đặt</strong></div>
+          <div class="hero-stat" id="weeklyNeedStat"><span>Cần đóng/tuần</span><strong id="weeklyNeedText">0 VND</strong></div>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div>
+          <div class="section-kicker">Tóm tắt nhanh</div>
+          <h2>Ai đang đóng nhiều hơn?</h2>
+          <p class="subtle">So sánh ngay giữa hai người để biết mức chênh lệch và cần cân đối thêm bao nhiêu.</p>
+        </div>
+        <div class="quick-balance" id="quickBalance"></div>
+        <div class="balance-row">
+          <div><div class="mini-label">Số giao dịch</div><strong id="heroCount">0</strong></div>
+          <div><div class="mini-label">Chênh lệch hiện tại</div><strong id="overallGap">0 VND</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="panel entry-panel tab-panel" id="entryPanel" data-panel="entry">
+          <div class="sheet-card">
+            <div class="entry-shell-header">
+              <div>
+                <div class="section-kicker">Nhập liệu</div>
+                <h2 id="entryPanelTitle">Thêm khoản đóng góp</h2>
+              </div>
+              <button class="close-icon" type="button" id="closeEntryModalBtn" aria-label="Đóng">×</button>
+            </div>
+            <div class="section-top desktop-only-title"><div><div class="section-kicker">Nhập liệu</div><h2 id="entryDesktopTitle">Thêm khoản đóng góp</h2></div></div>
+            <p class="subtle">Nhập mỗi lần một người bỏ tiền ra cho công việc chung. App sẽ cộng dồn vào tổng đóng góp của người đó.</p>
+            <form id="entryForm">
+              <label>Người đóng tiền<select id="contributor" required></select></label>
+              <div class="grid-two">
+                <label>Số tiền<input id="amount" type="number" min="1000" step="1000" placeholder="Ví dụ: 2.500.000" required></label>
+                <label>Ngày chi<input id="date" type="date" required></label>
+              </div>
+              <label>Hạng mục<select id="category" required><option value="Quảng cáo">Quảng cáo</option><option value="Nhân sự">Nhân sự</option><option value="Vận hành">Vận hành</option><option value="Mặt bằng">Mặt bằng</option><option value="Phần mềm">Phần mềm</option><option value="Khác">Khác</option></select></label>
+              <label>Ghi chú<textarea id="note" placeholder="Ví dụ: Tạm ứng lương nhân viên tháng 6"></textarea></label>
+              <div class="actions">
+                <button class="btn-primary" type="submit" id="submitEntryBtn">Lưu giao dịch</button>
+                <button class="btn-secondary" type="button" id="cancelEditBtn" hidden>Huỷ chỉnh sửa</button>
+                <button class="btn-secondary" type="button" id="exportJsonBtn">Xuất JSON</button>
+                <button class="btn-secondary" type="button" id="exportCsvBtn">Xuất CSV</button>
+              </div>
+            </form>
+            <div class="status" id="formStatus"></div>
+          </div>
+        </section>
+
+        <section class="panel settings-panel tab-panel" data-panel="settings">
+          <div class="section-top"><div><div class="section-kicker">Cài đặt</div><h3>Tên, mục tiêu và dữ liệu</h3></div></div>
+          <div class="grid-two">
+            <label>Người 1<input id="partnerOneName" type="text" maxlength="40" placeholder="Bạn"></label>
+            <label>Người 2<input id="partnerTwoName" type="text" maxlength="40" placeholder="Người bạn"></label>
+          </div>
+          <label>Mục tiêu mỗi người<input id="goalInput" type="number" min="1000000" step="1000000" placeholder="150000000"></label>
+          <label>Ngày đến hạn<input id="deadlineInput" type="date"></label>
+          <div class="actions">
+            <button class="btn-primary" type="button" id="saveSettingsBtn">Lưu cài đặt</button>
+            <button class="btn-secondary" type="button" id="importJsonBtn">Nhập JSON</button>
+            <button class="btn-danger" type="button" id="resetBtn">Xoá toàn bộ dữ liệu</button>
+          </div>
+          <input class="visually-hidden" id="importJsonInput" type="file" accept="application/json,.json">
+        </section>
+      </aside>
+      <main class="main">
+        <section class="panel tab-panel" data-panel="dashboard">
+          <div class="section-top"><div><div class="section-kicker">Tiến độ theo người</div><h2>Mỗi người đã đóng bao nhiêu và còn thiếu bao nhiêu</h2><p>Phần này là trọng tâm chính của app: nhìn phát thấy ngay mức đóng góp và khoảng cách đến mốc.</p></div></div>
+          <div class="summary-grid">
+            <div class="summary-box"><span>Tổng mục tiêu</span><strong id="overallTarget">300.000.000 VND</strong></div>
+            <div class="summary-box"><span>Tổng đã đóng</span><strong id="overallContributed">0 VND</strong></div>
+            <div class="summary-box"><span>Tổng còn thiếu</span><strong id="overallRemaining">300.000.000 VND</strong></div>
+            <div class="summary-box"><span>Tỷ lệ hoàn thành</span><strong id="overallPercent">0%</strong></div>
+          </div>
+          <div class="partner-grid" id="partnerCards"></div>
+          <div class="charts">
+            <div class="chart-card">
+              <div class="section-kicker">Biểu đồ cột</div>
+              <h3>Tiến độ góp vốn của từng người</h3>
+              <p class="subtle">Phần màu đậm là số tiền đã góp, phần màu nhạt là phần còn thiếu để đạt mốc.</p>
+              <svg id="contributionChart" viewBox="0 0 520 290" aria-label="Biểu đồ đóng góp"></svg>
+              <div class="legend">
+                <span class="legend-item"><span class="dot" style="background:#1d5a52"></span>Đã đóng</span>
+                <span class="legend-item"><span class="dot" style="background:#dfe9e3"></span>Còn thiếu</span>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="section-kicker">Biểu đồ tròn</div>
+              <h3>Cơ cấu chi tiêu</h3>
+              <p class="subtle">Màu sắc được tách rõ theo từng nhóm chi phí để đọc nhanh hơn.</p>
+              <svg id="categoryChart" viewBox="0 0 320 290" aria-label="Biểu đồ hạng mục"></svg>
+              <div class="legend" id="categoryLegend"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="categories">
+          <div class="section-top"><div><div class="section-kicker">Theo hạng mục</div><h2>Tổng hợp chi phí</h2></div></div>
+          <div id="categoryList" class="category-list"></div>
+          <div id="categoryEmpty" class="empty" hidden>Chưa có giao dịch nào để tổng hợp.</div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="history">
+          <div class="section-top"><div><div class="section-kicker">Lịch sử</div><h2>Danh sách giao dịch</h2><p>Sắp xếp từ mới nhất đến cũ nhất.</p></div></div>
+          <div class="filter-grid" id="historyFilters">
+            <label>Lọc theo người<select id="filterPartner"></select></label>
+            <label>Lọc theo hạng mục<select id="filterCategory"></select></label>
+            <label>Lọc theo tháng<select id="filterMonth"></select></label>
+          </div>
+          <div class="history-meta-row">
+            <div class="filter-count" id="historyCountText">Hiển thị 0 / 0 giao dịch</div>
+          </div>
+          <div id="historyList" class="history-list"></div>
+          <div id="historyEmpty" class="empty" hidden>Chưa có giao dịch nào. Hãy thêm khoản đầu tiên.</div>
+          <p class="footer-note">Dữ liệu được lưu bằng <code>localStorage</code> trên trình duyệt hiện tại.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <button class="fab" type="button" id="fabAdd" aria-label="Thêm giao dịch">+</button>
+
+  <div class="overlay" id="confirmOverlay" aria-hidden="true">
+    <div class="modal-card">
+      <div class="section-kicker" id="confirmKicker">Xác nhận</div>
+      <h3 id="confirmTitle">Xác nhận thao tác</h3>
+      <p id="confirmMessage"></p>
+      <label class="modal-input" id="confirmInputWrap" hidden>Nhập để xác nhận
+        <input id="confirmInput" type="text" autocomplete="off">
+      </label>
+      <div class="modal-error" id="confirmError"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" type="button" id="confirmCancelBtn">Huỷ</button>
+        <button class="btn-danger" type="button" id="confirmSubmitBtn">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="undoToast" aria-live="polite">
+    <span id="toastMessage">Đã xoá giao dịch.</span>
+    <button type="button" id="toastUndoBtn">Hoàn tác</button>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "startup-cashflow-tracker-v1";
+      const CHART_COLORS = ["#1d5a52", "#d3a047", "#c26d52", "#5e7fb7", "#7e9b6f", "#8f6ab4"];
+      const CATEGORY_OPTIONS = ["Quảng cáo", "Nhân sự", "Vận hành", "Mặt bằng", "Phần mềm", "Khác"];
+      const DEFAULT_STATE = {
+        goalPerPartner: 150000000,
+        partners: [
+          { id: "p1", name: "Bạn" },
+          { id: "p2", name: "Người bạn" }
+        ],
+        entries: []
+      };
+
+      const state = loadState();
+      let editingEntryId = null;
+      let pendingDelete = null;
+      let pendingConfirmAction = null;
+      let pendingImportData = null;
+      let currentTab = "dashboard";
+      let currentView = "all";
+      const filters = { partner: "all", category: "all", month: "all" };
+
+      const entryForm = document.getElementById("entryForm");
+      const contributor = document.getElementById("contributor");
+      const amount = document.getElementById("amount");
+      const dateInput = document.getElementById("date");
+      const category = document.getElementById("category");
+      const note = document.getElementById("note");
+      const submitEntryBtn = document.getElementById("submitEntryBtn");
+      const cancelEditBtn = document.getElementById("cancelEditBtn");
+      const formStatus = document.getElementById("formStatus");
+      const exportJsonBtn = document.getElementById("exportJsonBtn");
+      const exportCsvBtn = document.getElementById("exportCsvBtn");
+      const entryPanelTitle = document.getElementById("entryPanelTitle");
+      const entryDesktopTitle = document.getElementById("entryDesktopTitle");
+      const closeEntryModalBtn = document.getElementById("closeEntryModalBtn");
+      const fabAdd = document.getElementById("fabAdd");
+      const partnerOneName = document.getElementById("partnerOneName");
+      const partnerTwoName = document.getElementById("partnerTwoName");
+      const goalInput = document.getElementById("goalInput");
+      const deadlineInput = document.getElementById("deadlineInput");
+      const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+      const importJsonBtn = document.getElementById("importJsonBtn");
+      const importJsonInput = document.getElementById("importJsonInput");
+      const resetBtn = document.getElementById("resetBtn");
+      const heroGoal = document.getElementById("heroGoal");
+      const heroRaised = document.getElementById("heroRaised");
+      const heroRemaining = document.getElementById("heroRemaining");
+      const heroCount = document.getElementById("heroCount");
+      const quickBalance = document.getElementById("quickBalance");
+      const overallTarget = document.getElementById("overallTarget");
+      const overallContributed = document.getElementById("overallContributed");
+      const overallRemaining = document.getElementById("overallRemaining");
+      const overallGap = document.getElementById("overallGap");
+      const overallPercent = document.getElementById("overallPercent");
+      const deadlineStat = document.getElementById("deadlineStat");
+      const deadlineText = document.getElementById("deadlineText");
+      const weeklyNeedStat = document.getElementById("weeklyNeedStat");
+      const weeklyNeedText = document.getElementById("weeklyNeedText");
+      const partnerCards = document.getElementById("partnerCards");
+      const contributionChart = document.getElementById("contributionChart");
+      const categoryChart = document.getElementById("categoryChart");
+      const categoryLegend = document.getElementById("categoryLegend");
+      const categoryList = document.getElementById("categoryList");
+      const categoryEmpty = document.getElementById("categoryEmpty");
+      const filterPartner = document.getElementById("filterPartner");
+      const filterCategory = document.getElementById("filterCategory");
+      const filterMonth = document.getElementById("filterMonth");
+      const historyCountText = document.getElementById("historyCountText");
+      const historyList = document.getElementById("historyList");
+      const historyEmpty = document.getElementById("historyEmpty");
+      const tabButtons = Array.from(document.querySelectorAll("[data-tab]"));
+      const tabPanels = Array.from(document.querySelectorAll("[data-panel]"));
+      const viewButtons = Array.from(document.querySelectorAll("[data-view]"));
+      const confirmOverlay = document.getElementById("confirmOverlay");
+      const confirmKicker = document.getElementById("confirmKicker");
+      const confirmTitle = document.getElementById("confirmTitle");
+      const confirmMessage = document.getElementById("confirmMessage");
+      const confirmInputWrap = document.getElementById("confirmInputWrap");
+      const confirmInput = document.getElementById("confirmInput");
+      const confirmError = document.getElementById("confirmError");
+      const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+      const confirmSubmitBtn = document.getElementById("confirmSubmitBtn");
+      const undoToast = document.getElementById("undoToast");
+      const toastMessage = document.getElementById("toastMessage");
+      const toastUndoBtn = document.getElementById("toastUndoBtn");
+
+      dateInput.value = todayISO();
+      entryForm.addEventListener("submit", handleEntrySubmit);
+      cancelEditBtn.addEventListener("click", resetEntryForm);
+      exportJsonBtn.addEventListener("click", exportJson);
+      exportCsvBtn.addEventListener("click", exportCsv);
+      saveSettingsBtn.addEventListener("click", saveSettings);
+      importJsonBtn.addEventListener("click", () => importJsonInput.click());
+      importJsonInput.addEventListener("change", handleImportJson);
+      resetBtn.addEventListener("click", confirmResetAllData);
+      fabAdd.addEventListener("click", () => { resetEntryForm(); openEntryModal(); });
+      closeEntryModalBtn.addEventListener("click", closeEntryModal);
+      confirmCancelBtn.addEventListener("click", closeConfirmModal);
+      confirmSubmitBtn.addEventListener("click", handleConfirmSubmit);
+      toastUndoBtn.addEventListener("click", undoLastDelete);
+      filterPartner.addEventListener("change", () => { filters.partner = filterPartner.value; renderHistory(); });
+      filterCategory.addEventListener("change", () => { filters.category = filterCategory.value; renderHistory(); });
+      filterMonth.addEventListener("change", () => { filters.month = filterMonth.value; renderHistory(); });
+      window.addEventListener("keydown", handleEscape);
+      window.addEventListener("resize", handleResize);
+      tabButtons.forEach(button => {
+        button.addEventListener("click", () => setActiveTab(button.getAttribute("data-tab") || "dashboard"));
+      });
+      viewButtons.forEach(button => {
+        button.addEventListener("click", () => setCurrentView(button.getAttribute("data-view") || "all"));
+      });
+
+      function todayISO() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function roundToHundredThousand(value) {
+        return Math.ceil((value || 0) / 100000) * 100000;
+      }
+
+      function formatMoney(value) {
+        return new Intl.NumberFormat("vi-VN").format(Math.round(value || 0)) + " VND";
+      }
+
+      function formatCompactMoney(value) {
+        const amountValue = Math.round(value || 0);
+        if (amountValue >= 1000000) return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(amountValue / 1000000) + " triệu";
+        if (amountValue >= 1000) return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(amountValue / 1000) + " nghìn";
+        return amountValue + " VND";
+      }
+
+      function formatPercent(value) {
+        return `${Math.round(value || 0)}%`;
+      }
+
+      function formatShortDate(value) {
+        if (!value) return "";
+        return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value + "T00:00:00"));
+      }
+
+      function formatMonthLabel(monthKey) {
+        const [year, month] = monthKey.split("-");
+        return `${month}/${year}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function createId() {
+        return window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+      }
+
+      function cloneDefaultState() {
+        return {
+          goalPerPartner: DEFAULT_STATE.goalPerPartner,
+          partners: DEFAULT_STATE.partners.map(partner => ({ ...partner })),
+          entries: []
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { ...cloneDefaultState(), deadline: "" };
+          const parsed = JSON.parse(raw);
+          const base = cloneDefaultState();
+          return {
+            goalPerPartner: Number(parsed.goalPerPartner) > 0 ? Number(parsed.goalPerPartner) : base.goalPerPartner,
+            partners: Array.isArray(parsed.partners) && parsed.partners.length === 2
+              ? parsed.partners.map((partner, index) => ({
+                  id: partner.id || base.partners[index].id,
+                  name: String(partner.name || base.partners[index].name)
+                }))
+              : base.partners,
+            entries: Array.isArray(parsed.entries)
+              ? parsed.entries
+                  .filter(entry => entry && entry.contributorId && Number(entry.amount) > 0 && entry.date)
+                  .map(entry => ({
+                    id: entry.id || createId(),
+                    contributorId: entry.contributorId,
+                    amount: Number(entry.amount),
+                    date: entry.date,
+                    category: entry.category || "Khác",
+                    note: entry.note || ""
+                  }))
+              : [],
+            deadline: typeof parsed.deadline === "string" ? parsed.deadline : ""
+          };
+        } catch (error) {
+          return { ...cloneDefaultState(), deadline: "" };
+        }
+      }
+
+      function saveState() {
+        const payload = {
+          goalPerPartner: state.goalPerPartner,
+          partners: state.partners,
+          entries: state.entries,
+          deadline: state.deadline || ""
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      }
+
+      function commitPendingDeleteIfNeeded() {
+        if (!pendingDelete) return;
+        clearTimeout(pendingDelete.timeoutId);
+        pendingDelete = null;
+        hideToast();
+        saveState();
+      }
+
+      function setStatus(message) {
+        formStatus.textContent = message;
+      }
+
+      function partnerTotal(partnerId) {
+        return getScopedEntries().filter(entry => entry.contributorId === partnerId).reduce((sum, entry) => sum + entry.amount, 0);
+      }
+
+      function computeCategoryTotals() {
+        return getScopedEntries().reduce((acc, entry) => {
+          acc[entry.category] = (acc[entry.category] || 0) + entry.amount;
+          return acc;
+        }, {});
+      }
+
+      function getPartnerProgress() {
+        const allowed = new Set(getScopedPartnerIds());
+        return state.partners.filter(partner => allowed.has(partner.id)).map((partner, index) => {
+          const contributed = partnerTotal(partner.id);
+          const remaining = Math.max(state.goalPerPartner - contributed, 0);
+          const over = Math.max(contributed - state.goalPerPartner, 0);
+          const percent = state.goalPerPartner > 0 ? Math.min((contributed / state.goalPerPartner) * 100, 100) : 0;
+          return { ...partner, index, contributed, remaining, over, percent };
+        });
+      }
+
+      function getMonthOptions() {
+        const unique = [...new Set(getScopedEntries().map(entry => entry.date.slice(0, 7)))];
+        return unique.sort((a, b) => b.localeCompare(a));
+      }
+
+      function getFilteredEntries() {
+        return [...getScopedEntries()]
+          .filter(entry => filters.partner === "all" || entry.contributorId === filters.partner)
+          .filter(entry => filters.category === "all" || entry.category === filters.category)
+          .filter(entry => filters.month === "all" || entry.date.startsWith(filters.month))
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+      }
+
+      function isMobile() {
+        return window.innerWidth <= 768;
+      }
+
+      function getScopedPartnerIds() {
+        if (currentView === "all") return state.partners.map(partner => partner.id);
+        return [currentView];
+      }
+
+      function getScopedEntries() {
+        const allowed = new Set(getScopedPartnerIds());
+        return state.entries.filter(entry => allowed.has(entry.contributorId));
+      }
+
+      function setActiveTab(tabId) {
+        if (isMobile() && tabId === "entry") {
+          resetEntryForm();
+          openEntryModal();
+          return;
+        }
+        currentTab = tabId;
+        tabButtons.forEach(button => button.classList.toggle("is-active", button.getAttribute("data-tab") === currentTab));
+        tabPanels.forEach(panel => {
+          const panelId = panel.getAttribute("data-panel");
+          panel.hidden = panelId !== currentTab;
+        });
+      }
+
+      function setCurrentView(viewId) {
+        currentView = viewId;
+        viewButtons.forEach(button => button.classList.toggle("is-active", button.getAttribute("data-view") === currentView));
+        if (currentView === "all") {
+          filters.partner = "all";
+        } else {
+          filters.partner = currentView;
+        }
+        render();
+      }
+
+      function openEntryModal() {
+        if (!isMobile()) return;
+        document.body.classList.add("entry-modal-open");
+      }
+
+      function closeEntryModal() {
+        document.body.classList.remove("entry-modal-open");
+      }
+
+      function handleResize() {
+        if (!isMobile()) closeEntryModal();
+      }
+
+      function handleEscape(event) {
+        if (event.key !== "Escape") return;
+        closeConfirmModal();
+        closeEntryModal();
+      }
+
+      function updateFormMode() {
+        const isEditing = Boolean(editingEntryId);
+        submitEntryBtn.textContent = isEditing ? "Cập nhật giao dịch" : "Lưu giao dịch";
+        cancelEditBtn.hidden = !isEditing;
+        entryPanelTitle.textContent = isEditing ? "Chỉnh sửa giao dịch" : "Thêm khoản đóng góp";
+        entryDesktopTitle.textContent = entryPanelTitle.textContent;
+      }
+
+      function resetEntryForm() {
+        editingEntryId = null;
+        entryForm.reset();
+        dateInput.value = todayISO();
+        category.value = CATEGORY_OPTIONS[0];
+        renderContributorOptions();
+        updateFormMode();
+        setStatus("");
+      }
+
+      function fillEntryForm(entry) {
+        contributor.value = entry.contributorId;
+        amount.value = String(entry.amount);
+        dateInput.value = entry.date;
+        category.value = entry.category;
+        note.value = entry.note || "";
+      }
+
+      function handleEntrySubmit(event) {
+        event.preventDefault();
+        commitPendingDeleteIfNeeded();
+        const contributorId = contributor.value;
+        const rawAmount = Number(amount.value);
+        const entryDate = dateInput.value;
+        const entryCategory = category.value;
+        const entryNote = note.value.trim();
+
+        if (!contributorId || !entryDate || !entryCategory || !Number.isFinite(rawAmount) || rawAmount <= 0) {
+          setStatus("Nhập đủ thông tin hợp lệ trước khi lưu.");
+          return;
+        }
+
+        if (editingEntryId) {
+          const entry = state.entries.find(item => item.id === editingEntryId);
+          if (!entry) {
+            setStatus("Không tìm thấy giao dịch để cập nhật.");
+            resetEntryForm();
+            render();
+            return;
+          }
+          entry.contributorId = contributorId;
+          entry.amount = rawAmount;
+          entry.date = entryDate;
+          entry.category = entryCategory;
+          entry.note = entryNote;
+          saveState();
+          render();
+          resetEntryForm();
+          setStatus("Đã cập nhật giao dịch.");
+        } else {
+          state.entries.unshift({ id: createId(), contributorId, amount: rawAmount, date: entryDate, category: entryCategory, note: entryNote });
+          saveState();
+          render();
+          resetEntryForm();
+          setStatus("Đã lưu giao dịch mới.");
+        }
+
+        if (isMobile()) closeEntryModal();
+      }
+      function startEditing(entryId) {
+        const entry = state.entries.find(item => item.id === entryId);
+        if (!entry) return;
+        editingEntryId = entryId;
+        fillEntryForm(entry);
+        updateFormMode();
+        setStatus("Đang chỉnh sửa giao dịch.");
+        openEntryModal();
+      }
+
+      function downloadFile(filename, content, type) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function exportJson() {
+        commitPendingDeleteIfNeeded();
+        const exportState = {
+          goalPerPartner: state.goalPerPartner,
+          partners: state.partners,
+          entries: state.entries,
+          deadline: state.deadline || ""
+        };
+        downloadFile("dong-gop-khoi-nghiep.json", JSON.stringify(exportState, null, 2), "application/json");
+        setStatus("Đã xuất file JSON.");
+      }
+
+      function exportCsv() {
+        commitPendingDeleteIfNeeded();
+        const header = ["Ngày", "Người đóng", "Số tiền (VND)", "Hạng mục", "Ghi chú"];
+        const rows = state.entries.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).map(entry => {
+          const partner = state.partners.find(item => item.id === entry.contributorId);
+          return [entry.date, partner ? partner.name : "", String(entry.amount), entry.category, entry.note || ""];
+        });
+        const csv = [header, ...rows].map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\r\n");
+        const fileName = `dong-gop-khoi-nghiep-${todayISO()}.csv`;
+        downloadFile(fileName, "\uFEFF" + csv, "text/csv;charset=utf-8;");
+        setStatus("Đã xuất file CSV.");
+      }
+
+      function saveSettings() {
+        commitPendingDeleteIfNeeded();
+        const firstName = partnerOneName.value.trim() || "Bạn";
+        const secondName = partnerTwoName.value.trim() || "Người bạn";
+        const goal = Number(goalInput.value);
+        if (!Number.isFinite(goal) || goal <= 0) {
+          setStatus("Mục tiêu mỗi người phải lớn hơn 0.");
+          return;
+        }
+        state.partners[0].name = firstName;
+        state.partners[1].name = secondName;
+        state.goalPerPartner = goal;
+        state.deadline = deadlineInput.value || "";
+        saveState();
+        render();
+        setStatus("Đã cập nhật cài đặt.");
+      }
+
+      function validateImportPayload(payload) {
+        if (!payload || typeof payload !== "object") return false;
+        if (!Number.isFinite(Number(payload.goalPerPartner)) || Number(payload.goalPerPartner) <= 0) return false;
+        if (!Array.isArray(payload.partners) || payload.partners.length !== 2) return false;
+        if (!Array.isArray(payload.entries)) return false;
+        return true;
+      }
+
+      function handleImportJson(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const payload = JSON.parse(String(reader.result || "{}"));
+            if (!validateImportPayload(payload)) {
+              setStatus("File không đúng định dạng. Vui lòng chọn file JSON đã xuất từ app này.");
+              importJsonInput.value = "";
+              return;
+            }
+            pendingImportData = payload;
+            openConfirmModal({
+              kicker: "Nhập dữ liệu",
+              title: "Ghi đè dữ liệu hiện tại?",
+              message: "Nhập sẽ ghi đè dữ liệu hiện tại. Tiếp tục?",
+              confirmLabel: "Nhập dữ liệu",
+              danger: false,
+              onConfirm: applyImportedData
+            });
+          } catch (error) {
+            setStatus("File không đúng định dạng. Vui lòng chọn file JSON đã xuất từ app này.");
+            importJsonInput.value = "";
+          }
+        };
+        reader.readAsText(file, "utf-8");
+      }
+
+      function applyImportedData() {
+        if (!pendingImportData) return;
+        commitPendingDeleteIfNeeded();
+        const payload = pendingImportData;
+        state.goalPerPartner = Number(payload.goalPerPartner);
+        state.partners = payload.partners.map((partner, index) => ({
+          id: partner.id || DEFAULT_STATE.partners[index].id,
+          name: String(partner.name || DEFAULT_STATE.partners[index].name)
+        }));
+        state.entries = payload.entries.filter(entry => entry && entry.contributorId && Number(entry.amount) > 0 && entry.date).map(entry => ({
+          id: entry.id || createId(),
+          contributorId: entry.contributorId,
+          amount: Number(entry.amount),
+          date: entry.date,
+          category: entry.category || "Khác",
+          note: entry.note || ""
+        }));
+        state.deadline = typeof payload.deadline === "string" ? payload.deadline : "";
+        pendingImportData = null;
+        importJsonInput.value = "";
+        saveState();
+        resetEntryForm();
+        render();
+        setStatus("Đã nhập dữ liệu từ JSON.");
+      }
+
+      function confirmResetAllData() {
+        openConfirmModal({
+          kicker: "Xoá dữ liệu",
+          title: "Xoá toàn bộ dữ liệu?",
+          message: "Thao tác này sẽ xoá toàn bộ giao dịch và cài đặt. Hãy gõ “XOÁ” để xác nhận.",
+          confirmLabel: "Xoá toàn bộ",
+          danger: true,
+          requireText: "XOÁ",
+          onConfirm: () => {
+            pendingImportData = null;
+            if (pendingDelete) clearTimeout(pendingDelete.timeoutId);
+            pendingDelete = null;
+            hideToast();
+            state.goalPerPartner = DEFAULT_STATE.goalPerPartner;
+            state.partners = DEFAULT_STATE.partners.map(partner => ({ ...partner }));
+            state.entries = [];
+            state.deadline = "";
+            saveState();
+            resetEntryForm();
+            render();
+            setStatus("Đã xoá toàn bộ dữ liệu.");
+          }
+        });
+      }
+
+      function openConfirmModal(config) {
+        pendingConfirmAction = config;
+        confirmKicker.textContent = config.kicker || "Xác nhận";
+        confirmTitle.textContent = config.title || "Xác nhận thao tác";
+        confirmMessage.textContent = config.message || "";
+        confirmSubmitBtn.textContent = config.confirmLabel || "Xác nhận";
+        confirmSubmitBtn.className = config.danger ? "btn-danger" : "btn-primary";
+        confirmInputWrap.hidden = !config.requireText;
+        confirmInput.value = "";
+        confirmError.textContent = "";
+        confirmOverlay.classList.add("is-open");
+        document.body.classList.add("modal-open");
+        if (config.requireText) confirmInput.focus();
+      }
+
+      function closeConfirmModal() {
+        confirmOverlay.classList.remove("is-open");
+        document.body.classList.remove("modal-open");
+        confirmError.textContent = "";
+        pendingConfirmAction = null;
+      }
+
+      function handleConfirmSubmit() {
+        if (!pendingConfirmAction) return;
+        if (pendingConfirmAction.requireText && confirmInput.value.trim() !== pendingConfirmAction.requireText) {
+          confirmError.textContent = `Bạn cần nhập chính xác “${pendingConfirmAction.requireText}”.`;
+          return;
+        }
+        const action = pendingConfirmAction.onConfirm;
+        closeConfirmModal();
+        if (typeof action === "function") action();
+      }
+      function showToast(message, undoVisible = true) {
+        toastMessage.textContent = message;
+        toastUndoBtn.hidden = !undoVisible;
+        undoToast.classList.add("is-open");
+      }
+
+      function hideToast() {
+        undoToast.classList.remove("is-open");
+      }
+
+      function deleteEntryWithUndo(entryId) {
+        commitPendingDeleteIfNeeded();
+        const index = state.entries.findIndex(entry => entry.id === entryId);
+        if (index === -1) return;
+        const [removedEntry] = state.entries.splice(index, 1);
+        pendingDelete = {
+          entry: removedEntry,
+          index,
+          timeoutId: window.setTimeout(() => {
+            pendingDelete = null;
+            hideToast();
+            saveState();
+            render();
+          }, 5000)
+        };
+        render();
+        showToast("Đã xoá giao dịch — Hoàn tác?", true);
+      }
+
+      function undoLastDelete() {
+        if (!pendingDelete) return;
+        clearTimeout(pendingDelete.timeoutId);
+        state.entries.splice(Math.min(pendingDelete.index, state.entries.length), 0, pendingDelete.entry);
+        pendingDelete = null;
+        hideToast();
+        saveState();
+        render();
+        setStatus("Đã hoàn tác giao dịch vừa xoá.");
+      }
+
+      function renderContributorOptions() {
+        const current = contributor.value;
+        const visiblePartners = currentView === "all"
+          ? state.partners
+          : state.partners.filter(partner => partner.id === currentView);
+        contributor.innerHTML = "";
+        visiblePartners.forEach(partner => {
+          const option = document.createElement("option");
+          option.value = partner.id;
+          option.textContent = partner.name;
+          contributor.appendChild(option);
+        });
+        contributor.value = visiblePartners.some(partner => partner.id === current) ? current : visiblePartners[0].id;
+        contributor.disabled = currentView !== "all";
+      }
+
+      function renderSettings() {
+        partnerOneName.value = state.partners[0].name;
+        partnerTwoName.value = state.partners[1].name;
+        goalInput.value = String(state.goalPerPartner);
+        deadlineInput.value = state.deadline || "";
+      }
+
+      function renderHistoryFilters() {
+        const partnerValue = filters.partner;
+        const categoryValue = filters.category;
+        const monthValue = filters.month;
+        const visiblePartners = currentView === "all"
+          ? state.partners
+          : state.partners.filter(partner => partner.id === currentView);
+        filterPartner.innerHTML = `<option value="all">Tất cả người đóng</option>${visiblePartners.map(partner => `<option value="${partner.id}">${escapeHtml(partner.name)}</option>`).join("")}`;
+        filterCategory.innerHTML = `<option value="all">Tất cả hạng mục</option>${CATEGORY_OPTIONS.map(item => `<option value="${item}">${item}</option>`).join("")}`;
+        filterMonth.innerHTML = `<option value="all">Tất cả tháng</option>${getMonthOptions().map(month => `<option value="${month}">${formatMonthLabel(month)}</option>`).join("")}`;
+        filterPartner.value = Array.from(filterPartner.options).some(option => option.value === partnerValue) ? partnerValue : "all";
+        filterCategory.value = Array.from(filterCategory.options).some(option => option.value === categoryValue) ? categoryValue : "all";
+        filterMonth.value = Array.from(filterMonth.options).some(option => option.value === monthValue) ? monthValue : "all";
+        filters.partner = filterPartner.value;
+        filters.category = filterCategory.value;
+        filters.month = filterMonth.value;
+        filterPartner.disabled = currentView !== "all";
+      }
+
+      function getDeadlineState(totalRemaining) {
+        if (!state.deadline) {
+          return { label: "Chưa đặt", weeklyNeedLabel: "0 VND", isOverdue: false };
+        }
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const deadlineDate = new Date(state.deadline + "T00:00:00");
+        const diffDays = Math.ceil((deadlineDate - today) / 86400000);
+        if (diffDays < 0) {
+          return {
+            label: `Đã quá hạn ${Math.abs(diffDays)} ngày`,
+            weeklyNeedLabel: totalRemaining > 0 ? "Đã quá hạn" : "0 VND",
+            isOverdue: true
+          };
+        }
+        const weeksLeft = Math.max(diffDays / 7, 1 / 7);
+        const weeklyNeed = totalRemaining > 0 ? roundToHundredThousand(totalRemaining / weeksLeft) : 0;
+        return {
+          label: `Còn ${diffDays} ngày`,
+          weeklyNeedLabel: formatMoney(weeklyNeed),
+          isOverdue: false
+        };
+      }
+
+      function renderOverview(progressData) {
+        const scopedEntries = getScopedEntries();
+        const scopedPartnerCount = getScopedPartnerIds().length;
+        const totalContributed = progressData.reduce((sum, item) => sum + item.contributed, 0);
+        const totalTarget = state.goalPerPartner * scopedPartnerCount;
+        const totalRemaining = Math.max(totalTarget - totalContributed, 0);
+        const completion = totalTarget > 0 ? (totalContributed / totalTarget) * 100 : 0;
+        const gap = progressData.length === 2 ? Math.abs(progressData[0].contributed - progressData[1].contributed) : 0;
+        const deadlineState = getDeadlineState(totalRemaining);
+        heroGoal.textContent = formatMoney(state.goalPerPartner);
+        heroRaised.textContent = formatMoney(totalContributed);
+        heroRemaining.textContent = formatMoney(totalRemaining);
+        heroCount.textContent = String(scopedEntries.length);
+        overallTarget.textContent = formatMoney(totalTarget);
+        overallContributed.textContent = formatMoney(totalContributed);
+        overallRemaining.textContent = formatMoney(totalRemaining);
+        overallGap.textContent = formatMoney(gap);
+        overallPercent.textContent = formatPercent(completion);
+        deadlineText.textContent = deadlineState.label;
+        weeklyNeedText.textContent = deadlineState.weeklyNeedLabel;
+        deadlineStat.classList.toggle("is-danger", deadlineState.isOverdue);
+        weeklyNeedStat.classList.toggle("is-danger", deadlineState.isOverdue && totalRemaining > 0);
+        quickBalance.innerHTML = "";
+        progressData.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "balance-row";
+          row.innerHTML = `<div><div class="mini-label">${escapeHtml(item.name)}</div><strong>${formatMoney(item.contributed)}</strong></div><div><div class="mini-label">Còn thiếu</div><strong>${formatMoney(item.remaining)}</strong></div>`;
+          quickBalance.appendChild(row);
+        });
+      }
+
+      function renderPartnerCards(progressData) {
+        partnerCards.innerHTML = "";
+        progressData.forEach(item => {
+          const card = document.createElement("article");
+          card.className = "partner-card";
+          card.dataset.tone = String(item.index);
+          card.innerHTML = `
+            <div class="partner-head">
+              <div>
+                <div class="partner-name">${escapeHtml(item.name)}</div>
+                <div class="partner-sub">Mục tiêu: ${formatMoney(state.goalPerPartner)}</div>
+              </div>
+              <div class="partner-percent">${item.percent.toFixed(1)}%</div>
+            </div>
+            <div>
+              <div class="mini-label">Đã đóng</div>
+              <div class="partner-big">${formatCompactMoney(item.contributed)}</div>
+            </div>
+            <div class="progress"><div style="width:${item.percent}%"></div></div>
+            <div class="partner-detail-grid">
+              <div class="metric"><span>Còn thiếu</span><strong>${formatCompactMoney(item.remaining)}</strong></div>
+              <div class="metric"><span>Vượt mục tiêu</span><strong>${formatCompactMoney(item.over)}</strong></div>
+              <div class="metric"><span>Trạng thái</span><strong>${item.remaining === 0 ? "Đạt mốc" : "Chưa đủ"}</strong></div>
+            </div>
+          `;
+          partnerCards.appendChild(card);
+        });
+      }
+      function renderContributionChart(progressData) {
+        const maxGoal = state.goalPerPartner || 1;
+        const chartHeight = 180;
+        const baseY = 236;
+        const barWidth = 92;
+        const positions = [90, 290];
+        const grid = [0, 0.5, 1].map(step => {
+          const y = baseY - chartHeight * step;
+          return `<line x1="56" y1="${y}" x2="486" y2="${y}" stroke="${step === 0 ? '#bfd1c7' : '#e3ece7'}" stroke-width="${step === 0 ? 2 : 1.2}" stroke-dasharray="${step === 0 ? '0' : '4 6'}"></line>`;
+        }).join("");
+
+        const bars = progressData.map((item, index) => {
+          const contributedHeight = Math.max((Math.min(item.contributed, maxGoal) / maxGoal) * chartHeight, 0);
+          const remainingHeight = Math.max((item.remaining / maxGoal) * chartHeight, 0);
+          const x = positions[index] || (90 + index * 200);
+          const yContributed = baseY - contributedHeight;
+          const yRemaining = yContributed - remainingHeight;
+          const tone = index === 0 ? ["#1d5a52", "#2f756c"] : ["#d3a047", "#b9842f"];
+          const gradientId = `barGradient${index}`;
+          return `
+            <defs>
+              <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${tone[1]}"></stop>
+                <stop offset="100%" stop-color="${tone[0]}"></stop>
+              </linearGradient>
+            </defs>
+            <text x="${x + barWidth / 2}" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#495d56">${escapeHtml(item.name)}</text>
+            <text x="${x + barWidth / 2}" y="${Math.max(28, yRemaining - 12)}" text-anchor="middle" font-size="12" fill="#66756f">${escapeHtml(formatCompactMoney(item.contributed))}</text>
+            <rect x="${x}" y="${yRemaining}" width="${barWidth}" height="${remainingHeight}" rx="18" fill="#dfe9e3"></rect>
+            <rect x="${x}" y="${yContributed}" width="${barWidth}" height="${contributedHeight}" rx="18" fill="url(#${gradientId})"></rect>
+          `;
+        }).join("");
+
+        contributionChart.innerHTML = `
+          <rect x="24" y="18" width="472" height="248" rx="26" fill="#ffffff" opacity="0.45"></rect>
+          ${grid}
+          <line x1="56" y1="236" x2="486" y2="236" stroke="#bfd1c7" stroke-width="2"></line>
+          <text x="44" y="58" text-anchor="end" font-size="12" fill="#66756f">${formatCompactMoney(maxGoal)}</text>
+          <text x="44" y="150" text-anchor="end" font-size="12" fill="#66756f">${formatCompactMoney(maxGoal / 2)}</text>
+          <text x="44" y="240" text-anchor="end" font-size="12" fill="#66756f">0</text>
+          ${bars}
+        `;
+      }
+
+      function renderCategoryChart(categoryTotals) {
+        const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        const total = entries.reduce((sum, [, value]) => sum + value, 0);
+        if (!entries.length || total <= 0) {
+          categoryChart.innerHTML = `<circle cx="160" cy="128" r="78" fill="#edf3f0"></circle><circle cx="160" cy="128" r="44" fill="#ffffff"></circle><text x="160" y="134" text-anchor="middle" font-size="14" fill="#66756f">Chưa có dữ liệu</text>`;
+          categoryLegend.innerHTML = "";
+          return;
+        }
+
+        let startAngle = -Math.PI / 2;
+        const cx = 160;
+        const cy = 128;
+        const radius = 82;
+        const innerRadius = 44;
+        const slices = [];
+        const legends = [];
+
+        entries.forEach(([name, value], index) => {
+          const angle = (value / total) * Math.PI * 2;
+          const endAngle = startAngle + angle;
+          const largeArcFlag = angle > Math.PI ? 1 : 0;
+          const x1 = cx + Math.cos(startAngle) * radius;
+          const y1 = cy + Math.sin(startAngle) * radius;
+          const x2 = cx + Math.cos(endAngle) * radius;
+          const y2 = cy + Math.sin(endAngle) * radius;
+          const ix1 = cx + Math.cos(endAngle) * innerRadius;
+          const iy1 = cy + Math.sin(endAngle) * innerRadius;
+          const ix2 = cx + Math.cos(startAngle) * innerRadius;
+          const iy2 = cy + Math.sin(startAngle) * innerRadius;
+          const color = CHART_COLORS[index % CHART_COLORS.length];
+          slices.push(`<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${ix2} ${iy2} Z" fill="${color}" stroke="#ffffff" stroke-width="3"></path>`);
+          legends.push(`<span class="legend-item"><span class="dot" style="background:${color}"></span>${escapeHtml(name)} - ${Math.round((value / total) * 100)}%</span>`);
+          startAngle = endAngle;
+        });
+
+        categoryChart.innerHTML = `
+          <circle cx="${cx}" cy="${cy}" r="100" fill="#ffffff" opacity="0.55"></circle>
+          ${slices.join("")}
+          <circle cx="${cx}" cy="${cy}" r="${innerRadius - 1}" fill="#ffffff"></circle>
+          <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="12" fill="#66756f">Tổng chi</text>
+          <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="18" font-weight="700" fill="#142320">${escapeHtml(formatCompactMoney(total))}</text>
+        `;
+        categoryLegend.innerHTML = legends.join("");
+      }
+
+      function renderCategories(categoryTotals) {
+        categoryList.innerHTML = "";
+        const items = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+        const total = items.reduce((sum, [, value]) => sum + value, 0);
+        categoryEmpty.hidden = items.length > 0;
+        items.forEach(([name, value], index) => {
+          const percent = total > 0 ? (value / total) * 100 : 0;
+          const item = document.createElement("div");
+          item.className = "category-item";
+          item.innerHTML = `<div class="category-top"><strong>${escapeHtml(name)}</strong><strong>${formatMoney(value)}</strong></div><div class="subtle">${formatPercent(percent)} tổng chi</div><div class="bar-track"><div class="bar-fill" style="width:${percent}%; background: linear-gradient(90deg, ${CHART_COLORS[index % CHART_COLORS.length]}, var(--brand-2));"></div></div>`;
+          categoryList.appendChild(item);
+        });
+      }
+
+      function renderHistory() {
+        renderHistoryFilters();
+        historyList.innerHTML = "";
+        const scopedEntries = getScopedEntries();
+        const filteredEntries = getFilteredEntries();
+        historyCountText.textContent = `Hiển thị ${filteredEntries.length} / ${scopedEntries.length} giao dịch`;
+        if (!scopedEntries.length) {
+          historyEmpty.textContent = "Chưa có giao dịch nào. Hãy thêm khoản đầu tiên.";
+          historyEmpty.hidden = false;
+          return;
+        }
+        if (!filteredEntries.length) {
+          historyEmpty.textContent = "Không tìm thấy giao dịch phù hợp.";
+          historyEmpty.hidden = false;
+          return;
+        }
+        historyEmpty.hidden = true;
+        filteredEntries.forEach(entry => {
+          const partner = state.partners.find(item => item.id === entry.contributorId);
+          const item = document.createElement("article");
+          item.className = "history-item";
+          item.innerHTML = `
+            <div class="history-top">
+              <div>
+                <div class="amount">${formatMoney(entry.amount)}</div>
+                <div class="history-meta">
+                  <span class="tag">${escapeHtml(partner ? partner.name : "Không rõ")}</span>
+                  <span class="tag">${escapeHtml(entry.category)}</span>
+                  <span>${formatShortDate(entry.date)}</span>
+                </div>
+              </div>
+            </div>
+            <p>${entry.note ? escapeHtml(entry.note) : "Không có ghi chú."}</p>
+            <div class="history-actions">
+              <button class="btn-secondary" type="button" data-edit="${entry.id}">Sửa</button>
+              <button class="btn-danger" type="button" data-delete="${entry.id}">Xoá</button>
+            </div>
+          `;
+          historyList.appendChild(item);
+        });
+        historyList.querySelectorAll("[data-edit]").forEach(button => {
+          button.addEventListener("click", () => startEditing(button.getAttribute("data-edit")));
+        });
+        historyList.querySelectorAll("[data-delete]").forEach(button => {
+          button.addEventListener("click", () => deleteEntryWithUndo(button.getAttribute("data-delete")));
+        });
+      }
+
+      function render() {
+        setActiveTab(currentTab);
+        renderContributorOptions();
+        renderSettings();
+        updateFormMode();
+        const progressData = getPartnerProgress();
+        const categoryTotals = computeCategoryTotals();
+        renderOverview(progressData);
+        renderPartnerCards(progressData);
+        renderContributionChart(progressData);
+        renderCategoryChart(categoryTotals);
+        renderCategories(categoryTotals);
+        renderHistory();
+      }
+
+      render();
+    })();
+  </script>
+</body>
+</html>
