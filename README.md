@@ -1,42 +1,37 @@
-# Quản Lý Đóng Góp Khởi Nghiệp
+# Shopee Income Sales Analyzer
 
-Ứng dụng web theo dõi dòng vốn của 2 người sáng lập. Chạy trực tiếp trên trình duyệt, không cần server.
+Web app tĩnh để phân tích file báo cáo thu nhập Shopee dạng:
 
-## Deploy lên GitHub (dùng miễn phí qua GitHub Pages)
-
-### Cách 1 — Không cần cài Git (nhanh nhất)
-
-1. Đăng nhập [GitHub](https://github.com).
-2. Bấm **+** → **New repository**.
-3. Đặt tên repo (ví dụ: `startup-cashflow`), chọn **Public**, bấm **Create repository**.
-4. Trên trang repo mới, chọn **uploading an existing file**.
-5. Kéo thả toàn bộ file trong thư mục `game` vào (gồm `index.html`, `manifest.json`, `service-worker.js`, icon nếu có).
-6. Bấm **Commit changes**.
-7. Vào **Settings** → **Pages**:
-   - **Source**: Deploy from a branch
-   - **Branch**: `main` (hoặc `master`) / folder **/(root)**
-   - **Save**
-8. Đợi 1–2 phút, mở link dạng:  
-   `https://<tên-github-của-bạn>.github.io/<tên-repo>/`
-
-### Cách 2 — Dùng Git trên máy
-
-1. Cài [Git for Windows](https://git-scm.com/download/win), mở lại terminal.
-2. Trong thư mục `game`:
-
-```powershell
-cd "C:\Users\luudu\Downloads\game"
-git init
-git add .
-git commit -m "Initial commit: startup cashflow app"
-git branch -M main
-git remote add origin https://github.com/LilDung/DP_store.git
-git push -u origin main
+```text
+Income.đã phát hành.vn.*.xlsx
 ```
 
-3. Bật **GitHub Pages** như bước 7 ở Cách 1.
+## Tính năng
 
-## Lưu ý
+- Kéo thả hoặc chọn file Excel trực tiếp trên trình duyệt.
+- Đọc sheet `Doanh thu`.
+- Tự tìm dòng header có các cột như `Mã giao dịch`, `Đơn hàng / Sản phẩm`, `Mã đơn hàng`, `Tên sản phẩm`.
+- Gom dữ liệu theo `Mã đơn hàng`, liên kết dòng tổng `Order` với các dòng sản phẩm `Sku`.
+- Không tính dòng sản phẩm rỗng hoặc `-` là sản phẩm.
+- Doanh thu đơn lấy từ cột `Tổng tiền đã thanh toán` ở dòng tổng đơn hàng; không lấy doanh thu ở dòng sản phẩm.
+- Lưu mô hình dữ liệu tách riêng `orders` và `orderItems` trong trình duyệt.
+- Dashboard: tổng doanh thu, tổng đơn, đơn hoàn, tổng sản phẩm bán, tỷ lệ hoàn đơn.
+- Biểu đồ: doanh thu theo ngày, doanh thu theo tháng, đơn hoàn theo tháng.
+- Thống kê sản phẩm: tên sản phẩm, đã bán, đơn hoàn, doanh thu, giá vốn, lợi nhuận.
+- Tìm kiếm, sắp xếp và lọc theo thời gian.
+- Thống kê đơn hoàn: mã đơn, ngày đặt, sản phẩm, giá trị hoàn, lý do hoàn nếu file có cột tương ứng.
+- Quản lý sản phẩm: gộp nhiều tên sản phẩm về một tên chuẩn.
+- Báo cáo lợi nhuận theo sản phẩm và theo tháng.
+- Xuất báo cáo Excel và PDF.
 
-- `manifest.json` tham chiếu `icon-192.png` và `icon-512.png`. Nếu chưa có file icon, app vẫn chạy nhưng cài lên màn hình chính có thể thiếu biểu tượng.
-- Dữ liệu lưu trong **localStorage** của trình duyệt — mỗi thiết bị/trình duyệt có bộ dữ liệu riêng.
+## Cách chạy
+
+Mở file `index.html` bằng trình duyệt.
+
+Lưu ý: app dùng SheetJS qua CDN để đọc Excel, vì vậy máy cần có Internet khi mở trang lần đầu.
+
+## Công nghệ
+
+- HTML/CSS/JavaScript thuần.
+- SheetJS `xlsx` để đọc file Excel trong trình duyệt.
+- Không có backend, dữ liệu không được upload lên server.

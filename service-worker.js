@@ -1,4 +1,4 @@
-const CACHE = "startup-cashflow-v1";
+const CACHE = "shopee-sales-analyzer-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,6 +23,8 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then(match => {

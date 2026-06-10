@@ -1,1658 +1,1517 @@
-﻿
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#103b35">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <title>Quản Lý Đóng Góp Khởi Nghiệp</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Shopee Income</title>
+  <meta name="description" content="Phân tích doanh thu, đơn hoàn, sản phẩm và lợi nhuận từ file Income Shopee." />
+  <link rel="manifest" href="manifest.json" />
   <style>
     :root {
-      --surface: #ffffff;
-      --surface-soft: #f6faf7;
-      --surface-tint: #eef5f1;
-      --ink: #152521;
-      --muted: #66756f;
-      --line: #d8e6de;
-      --brand: #103b35;
-      --brand-2: #1d5a52;
-      --accent: #d3a047;
-      --accent-2: #c26d52;
-      --danger: #b2534d;
-      --partner-a: #1d5a52;
-      --partner-b: #b9842f;
-      --shadow: 0 18px 44px rgba(16, 59, 53, 0.08);
-      --radius-xl: 24px;
-      --radius-lg: 18px;
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #64748b;
+      --line: #d9e0ea;
+      --brand: #e84d2a;
+      --brand-dark: #b8321b;
+      --ok: #16794c;
+      --danger: #b91c1c;
+      --amber: #b45309;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
     }
 
     * { box-sizing: border-box; }
 
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background:
-        radial-gradient(circle at top right, rgba(211, 160, 71, 0.16), transparent 20%),
-        radial-gradient(circle at bottom left, rgba(29, 90, 82, 0.10), transparent 24%),
-        linear-gradient(180deg, #f6f7f4 0%, #edf3ef 100%);
-      color: var(--ink);
-      font-family: "Segoe UI", Arial, sans-serif;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
     body {
-      padding: 24px;
-      overflow-x: hidden;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
     }
 
-    body.modal-open,
-    body.entry-modal-open {
-      overflow: hidden;
+    button,
+    input,
+    select {
+      font: inherit;
     }
-
-    .app { max-width: 1240px; margin: 0 auto; display: grid; gap: 20px; }
-
-    .app-chrome {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .view-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex: 1 1 280px;
-    }
-
-    .view-bar-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .view-switch {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .tabbar {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .tab-btn,
-    .view-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.88);
-      color: var(--muted);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-      box-shadow: none;
-      width: auto;
-      white-space: nowrap;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .tab-icon {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .tab-btn.is-active,
-    .view-btn.is-active {
-      color: #fff;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      border-color: transparent;
-      box-shadow: 0 10px 18px rgba(16, 59, 53, 0.14);
-    }
-
-    .tab-btn.is-active .tab-icon {
-      stroke: #fff;
-    }
-    .tab-panel[hidden] {
-      display: none !important;
-    }
-    .hero, .layout, .charts { display: grid; gap: 18px; }
-    .hero { grid-template-columns: 1.7fr 1fr; }
-    .layout { grid-template-columns: 340px minmax(0, 1fr); gap: 20px; }
-    .charts { grid-template-columns: 1.1fr 0.9fr; margin-top: 18px; }
-
-    .hero-main, .hero-side, .panel, .sheet-card, .modal-card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow);
-    }
-
-    .hero-main {
-      padding: 28px;
-      background:
-        radial-gradient(circle at top right, rgba(211, 160, 71, 0.22), transparent 28%),
-        linear-gradient(135deg, rgba(16, 59, 53, 0.98), rgba(29, 90, 82, 0.95));
-      color: #f7fbf8;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-main::after {
-      content: "";
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      right: -60px;
-      top: -50px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 65%);
-      pointer-events: none;
-    }
-
-    .hero-side, .panel, .sheet-card, .modal-card { padding: 22px; }
-    .hero-side {
-      display: grid;
-      gap: 14px;
-      align-content: start;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%);
-    }
-
-    .eyebrow, .section-kicker, .mini-label, .metric span, .summary-box span, .hero-stat span {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    .eyebrow { margin: 0 0 10px; color: rgba(247, 251, 248, 0.72); }
-    .section-kicker, .mini-label { color: var(--muted); }
-
-    .hero-main h1 { margin: 0; font-size: clamp(28px, 4vw, 46px); line-height: 1.02; letter-spacing: -0.03em; }
-    .hero-main p, .subtle, .section-top p, .history-item p, .modal-card p { margin: 8px 0 0; color: var(--muted); line-height: 1.55; font-size: 14px; }
-    .hero-main p { margin-top: 14px; max-width: 760px; color: rgba(247, 251, 248, 0.82); font-size: 15px; }
-
-    .hero-stats, .summary-grid, .partner-grid, .partner-detail-grid, .grid-two, .filter-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .hero-stats { margin-top: 22px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-    .summary-grid { margin-top: 18px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .partner-grid { margin-top: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-two, .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .partner-detail-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-
-    .hero-stat, .summary-box, .metric, .category-item, .history-item, .chart-card, .partner-card, .balance-row, .sheet-card {
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: var(--surface-soft);
-    }
-
-    .hero-stat {
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.10);
-      border-color: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(10px);
-    }
-
-    .hero-stat strong, .summary-box strong { display: block; margin-top: 8px; }
-    .hero-stat span { color: rgba(247, 251, 248, 0.68); }
-    .hero-stat strong { font-size: 23px; color: #fff; }
-    .hero-stat.is-danger strong { color: #ffd7d3; }
-
-    .summary-box, .metric, .category-item, .history-item, .chart-card, .partner-card, .balance-row, .sheet-card { padding: 16px; }
-    .summary-box strong { font-size: 24px; line-height: 1.1; }
-    .summary-box {
-      background: linear-gradient(180deg, #fbfdfc 0%, #f4faf7 100%);
-    }
-
-    .quick-balance, .sidebar, .main, .category-list, .history-list { display: grid; gap: 12px; }
-    .sidebar, .main { gap: 20px; align-content: start; }
-    .balance-row, .section-top, .partner-head, .category-top, .history-top, .history-actions, .actions, .modal-actions, .sheet-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .section-top { align-items: end; }
-    .balance-row strong { font-size: 18px; }
-    h2, h3 { margin: 0; font-size: 20px; line-height: 1.2; }
-    label { display: grid; gap: 8px; margin-top: 14px; font-size: 13px; font-weight: 700; }
-    input, select, textarea, button { font: inherit; }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #fff;
-      color: var(--ink);
-      outline: none;
-    }
-
-    textarea { min-height: 92px; resize: vertical; }
-    input:focus, select:focus, textarea:focus { border-color: rgba(29, 90, 82, 0.45); box-shadow: 0 0 0 4px rgba(29, 90, 82, 0.08); }
 
     button {
       border: 0;
-      border-radius: 999px;
-      padding: 13px 18px;
+      border-radius: 6px;
+      padding: 10px 13px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 700;
       cursor: pointer;
-      transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
     }
 
-    button:hover { transform: translateY(-1px); }
-    .btn-primary { background: var(--brand); color: #fff; font-weight: 700; box-shadow: 0 10px 18px rgba(16, 59, 53, 0.14); }
-    .btn-secondary { background: #edf4f1; color: var(--brand); font-weight: 700; }
-    .btn-danger { background: #fbeceb; color: var(--danger); font-weight: 700; }
-
-    .actions { margin-top: 18px; flex-wrap: wrap; justify-content: flex-start; }
-    .status { margin-top: 14px; min-height: 20px; color: var(--brand-2); font-size: 14px; }
-
-    .partner-card {
-      background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
-      display: grid;
-      gap: 14px;
-      position: relative;
-      overflow: hidden;
+    button.secondary {
+      background: #eef2f7;
+      color: #334155;
     }
 
-    .partner-card::after {
-      content: "";
-      position: absolute;
-      inset: auto -30px -50px auto;
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(211, 160, 71, 0.12), transparent 65%);
-      pointer-events: none;
+    button.danger {
+      background: #fee2e2;
+      color: var(--danger);
     }
 
-    .partner-card[data-tone="0"] { box-shadow: inset 0 4px 0 var(--partner-a); }
-    .partner-card[data-tone="1"] { box-shadow: inset 0 4px 0 var(--partner-b); }
-    .partner-name { font-size: 24px; font-weight: 700; line-height: 1.1; }
-    .partner-percent { padding: 7px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #eef5f3; color: var(--brand); }
-    .partner-big { font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
-    .partner-sub { color: var(--muted); font-size: 14px; }
-
-    .progress, .bar-track { height: 12px; border-radius: 999px; background: #e8efeb; overflow: hidden; }
-    .bar-track { height: 10px; margin-top: 10px; }
-    .progress > div, .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--brand-2)); }
-    .metric strong { display: block; margin-top: 7px; font-size: 17px; line-height: 1.3; }
-
-    .chart-card {
-      background: linear-gradient(180deg, #fcfefd 0%, #f3f9f6 100%);
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
     }
 
-    .chart-card svg { display: block; width: 100%; height: auto; margin-top: 14px; }
-    .legend, .history-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-    .legend-item { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .tag { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; background: #eef4f2; color: var(--brand); font-size: 12px; font-weight: 700; }
-    .amount { font-size: 22px; font-weight: 800; }
-    .empty { margin-top: 18px; padding: 18px; border-radius: 16px; border: 1px dashed #cbd9d2; background: #fbfcfb; color: var(--muted); text-align: center; }
-    .footer-note { margin-top: 18px; color: var(--muted); font-size: 13px; }
-    .history-actions { justify-content: flex-end; flex-wrap: wrap; }
-    .history-actions button { padding: 10px 14px; }
-    .history-meta-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
-    .filter-count { color: var(--muted); font-size: 14px; }
-
-    .fab {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color: #fff;
-      font-size: 32px;
-      line-height: 1;
-      box-shadow: 0 18px 30px rgba(15, 58, 53, 0.22);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 25;
+    input:focus,
+    select:focus {
+      border-color: rgba(232, 77, 42, 0.6);
+      box-shadow: 0 0 0 3px rgba(232, 77, 42, 0.12);
     }
 
-    .entry-shell-header { display: none; }
-    .close-icon { background: transparent; color: var(--brand); font-size: 28px; padding: 0 4px; box-shadow: none; }
-
-    .overlay,
-    .toast {
-      position: fixed;
-      z-index: 40;
+    .shell {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 30px 0 46px;
     }
 
-    .overlay {
-      inset: 0;
-      background: rgba(20, 35, 32, 0.46);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .overlay.is-open { display: flex; }
-    .modal-card { max-width: 460px; width: 100%; }
-    .modal-actions { justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
-    .modal-input { margin-top: 18px; }
-    .modal-error { min-height: 20px; color: var(--danger); font-size: 14px; margin-top: 10px; }
-
-    .toast {
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%) translateY(120px);
-      min-width: min(92vw, 420px);
-      background: rgba(20, 35, 32, 0.96);
-      color: #fff;
-      border-radius: 18px;
-      padding: 14px 16px;
+    header {
       display: flex;
       justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .dropzone {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 190px;
+      padding: 24px;
+      border: 2px dashed #b9c4d3;
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .dropzone.is-dragging {
+      border-color: var(--brand);
+      background: #fff7f4;
+      transform: translateY(-1px);
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .drop-content {
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .upload-icon {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 14px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #fff0ea;
+      color: var(--brand);
+    }
+
+    .drop-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .drop-note {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status {
+      min-height: 28px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status.error { color: var(--danger); font-weight: 700; }
+    .status.ok { color: var(--ok); font-weight: 700; }
+
+    .hidden { display: none !important; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 22px 0 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar label,
+    .mapping-form label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .action-row {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .metric {
+      min-height: 126px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .metric-label {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .metric-value {
+      margin: 0;
+      font-size: clamp(25px, 3.2vw, 38px);
+      line-height: 1;
+      font-weight: 850;
+      word-break: break-word;
+    }
+
+    .metric small {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: 1.1fr 0.9fr 0.9fr; }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel-body {
+      padding: 16px 18px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #edf1f6;
+      text-align: left;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      background: #fbfcfe;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    th.sortable {
+      cursor: pointer;
+    }
+
+    td.number,
+    th.number {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .chart {
+      display: grid;
+      gap: 11px;
+      padding: 16px 18px 18px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: minmax(86px, 122px) 1fr minmax(74px, auto);
       gap: 12px;
       align-items: center;
-      box-shadow: 0 16px 30px rgba(20, 35, 32, 0.24);
-      opacity: 0;
-      pointer-events: none;
-      transition: transform 180ms ease, opacity 180ms ease;
+      min-height: 30px;
     }
 
-    .toast.is-open {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .toast button { padding: 8px 12px; background: rgba(255,255,255,0.12); color: #fff; width: auto; }
-
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
+    .bar-label {
+      color: #334155;
+      font-weight: 700;
+      font-size: 13px;
       overflow: hidden;
-      clip: rect(0, 0, 0, 0);
+      text-overflow: ellipsis;
       white-space: nowrap;
-      border: 0;
     }
 
-    @media (max-width: 1100px) {
-      .hero, .layout, .charts { grid-template-columns: 1fr; }
-      .summary-grid, .partner-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bar-track {
+      position: relative;
+      height: 24px;
+      border-radius: 5px;
+      background: #eef2f7;
+      overflow: hidden;
     }
 
-    @media (max-width: 768px) {
-      :root {
-        --mobile-nav-h: 72px;
-      }
+    .bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--brand), #f59e0b);
+      transition: width 280ms ease;
+    }
 
-      .main > .panel:nth-of-type(2) { order: 3; }
-      .main > .panel:nth-of-type(3) { order: 2; }
-      body {
-        padding: 12px 12px calc(var(--mobile-nav-h) + 20px + env(safe-area-inset-bottom, 0px));
-      }
+    .bar-fill.alt { background: linear-gradient(90deg, #0f766e, #22c55e); }
+    .bar-fill.danger { background: linear-gradient(90deg, #b91c1c, #f97316); }
 
-      .app-chrome {
-        position: sticky;
-        top: 0;
-        z-index: 24;
-        display: block;
-        margin: -4px -4px 12px;
-        padding: 10px 10px 12px;
-        border-radius: 18px;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.94);
-        backdrop-filter: blur(14px);
-        box-shadow: 0 10px 28px rgba(16, 59, 53, 0.06);
-      }
+    .bar-value {
+      text-align: right;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
 
-      .view-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-      }
+    .mapping-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
 
-      .view-bar-label {
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
+    .mapping-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
 
-      .view-switch {
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        padding-bottom: 2px;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-      }
+    .mapping-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfe;
+      font-size: 13px;
+    }
 
-      .view-switch::-webkit-scrollbar { display: none; }
+    .debug {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
 
-      .view-btn {
-        flex: 0 0 auto;
-        padding: 9px 14px;
-        font-size: 13px;
-      }
+    .debug code {
+      color: #334155;
+      background: #eef2f7;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
 
-      .tabbar {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 30;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 4px;
-        margin: 0;
-        padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
-        border-top: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(16px);
-        box-shadow: 0 -10px 30px rgba(16, 59, 53, 0.08);
-      }
+    @media print {
+      body { background: #fff; }
+      .dropzone,
+      .status,
+      .toolbar,
+      .panel.controls,
+      .no-print { display: none !important; }
+      .shell { width: 100%; padding: 0; }
+      .panel,
+      .metric { box-shadow: none; break-inside: avoid; }
+    }
 
-      .tab-btn[data-tab="entry"] { display: none; }
-
-      .tab-btn {
-        flex-direction: column;
-        gap: 4px;
-        padding: 6px 4px;
-        border: 0;
-        border-radius: 14px;
-        background: transparent;
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 700;
-        line-height: 1.2;
-        min-height: 56px;
-        box-shadow: none;
-      }
-
-      .tab-btn .tab-icon {
-        width: 22px;
-        height: 22px;
-      }
-
-      .tab-btn.is-active {
-        color: var(--brand);
-        background: var(--surface-tint);
-        box-shadow: inset 0 0 0 1px rgba(29, 90, 82, 0.12);
-      }
-
-      .tab-btn.is-active .tab-icon {
-        stroke: var(--brand);
-      }
-
-      .tab-btn:active {
-        transform: scale(0.97);
-      }
-
-      .hero-stats, .summary-grid, .partner-grid, .partner-detail-grid, .grid-two, .filter-grid { grid-template-columns: 1fr; }
-      .section-top, .category-top, .history-top, .partner-head, .balance-row, .history-actions, .actions, .sheet-head { flex-direction: column; align-items: flex-start; }
-      .main { order: 1; }
-      .sidebar { order: 2; }
-      .settings-panel { margin-bottom: 0; }
-      .entry-panel { display: none; }
-      .fab {
-        display: inline-flex;
-        right: 16px;
-        bottom: calc(var(--mobile-nav-h) + 16px + env(safe-area-inset-bottom, 0px));
-        width: 56px;
-        height: 56px;
-        font-size: 28px;
-      }
-      .entry-shell-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 8px;
-      }
-      body.entry-modal-open .entry-panel {
-        display: block;
-        position: fixed;
-        inset: 0;
-        z-index: 35;
-        margin: 0;
-        padding: 18px;
-        border-radius: 0;
-        background: rgba(20, 35, 32, 0.46);
-      }
-      body.entry-modal-open .entry-panel .sheet-card {
-        max-height: calc(100vh - 36px);
-        overflow: auto;
-        background: #fff;
-      }
-      .modal-card { padding: 20px; }
-      button:not(.tab-btn):not(.view-btn):not(.fab):not(.close-icon) { width: 100%; }
-      .history-actions button, .toast button { width: auto; }
-      .toast {
-        min-width: calc(100vw - 28px);
-        bottom: calc(var(--mobile-nav-h) + 20px + env(safe-area-inset-bottom, 0px));
+    @media (max-width: 980px) {
+      header { display: block; }
+      .badge { margin-top: 14px; }
+      .metrics,
+      .grid-2,
+      .grid-3,
+      .toolbar,
+      .mapping-form,
+      .mapping-item {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="app-chrome">
-      <div class="view-bar">
-        <span class="view-bar-label">Bộ lọc</span>
-        <div class="view-switch" id="viewSwitch">
-          <button class="view-btn is-active" type="button" data-view="all">Tất cả</button>
-          <button class="view-btn" type="button" data-view="p1" id="viewBtnP1">Người 1</button>
-          <button class="view-btn" type="button" data-view="p2" id="viewBtnP2">Người 2</button>
-        </div>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>Dashboard Shopee Income</h1>
+        <p class="subtitle">Import file <strong>Income.đã phát hành.vn.*.xlsx</strong>. Gom theo <strong>Mã đơn hàng</strong>: dòng <strong>Order</strong> (tổng thực nhận) + các dòng <strong>Sku</strong>. Doanh thu từng sản phẩm được <strong>phân bổ ngược</strong> theo tỷ trọng <strong>Giá sản phẩm</strong> trên từng dòng Sku.</p>
       </div>
-      <nav class="tabbar" id="tabbar" aria-label="Điều hướng chính">
-        <button class="tab-btn is-active" type="button" data-tab="dashboard">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8.5Z"/></svg>
-          <span class="tab-label">Tổng quan</span>
-        </button>
-        <button class="tab-btn" type="button" data-tab="history">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="15" r="4"/><path d="M18 13v3l2 1"/></svg>
-          <span class="tab-label">Lịch sử</span>
-        </button>
-        <button class="tab-btn" type="button" data-tab="categories">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
-          <span class="tab-label">Hạng mục</span>
-        </button>
-        <button class="tab-btn" type="button" data-tab="entry">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          <span class="tab-label">Nhập liệu</span>
-        </button>
-        <button class="tab-btn" type="button" data-tab="settings">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-          <span class="tab-label">Cài đặt</span>
-        </button>
-      </nav>
+      <div class="badge">Xử lý trực tiếp trên trình duyệt</div>
     </header>
-    <section class="hero">
-      <div class="hero-main">
-        <p class="eyebrow">Dashboard đóng góp</p>
-        <h1>Theo dõi rõ tiền đã bỏ vào và phần còn thiếu của từng người.</h1>
-        <p>Mỗi khoản chi cho quảng cáo, nhân sự hay vận hành đều được cộng vào phần đóng góp của người thực hiện. Mục tiêu mặc định là 150.000.000 VND cho mỗi người.</p>
-        <div class="hero-stats">
-          <div class="hero-stat"><span>Mục tiêu mỗi người</span><strong id="heroGoal">150.000.000 VND</strong></div>
-          <div class="hero-stat"><span>Tổng đã đóng</span><strong id="heroRaised">0 VND</strong></div>
-          <div class="hero-stat"><span>Tổng còn thiếu</span><strong id="heroRemaining">300.000.000 VND</strong></div>
-          <div class="hero-stat" id="deadlineStat"><span>Thời hạn</span><strong id="deadlineText">Chưa đặt</strong></div>
-          <div class="hero-stat" id="weeklyNeedStat"><span>Cần đóng/tuần</span><strong id="weeklyNeedText">0 VND</strong></div>
+
+    <section id="dropzone" class="dropzone" aria-label="Khu vực kéo thả file Excel">
+      <input id="fileInput" type="file" accept=".xlsx,.xls" />
+      <div class="drop-content">
+        <div class="upload-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M12 16V4m0 0 4.5 4.5M12 4 7.5 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 16.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
         </div>
-      </div>
-      <div class="hero-side">
-        <div>
-          <div class="section-kicker">Tóm tắt nhanh</div>
-          <h2>Ai đang đóng nhiều hơn?</h2>
-          <p class="subtle">So sánh ngay giữa hai người để biết mức chênh lệch và cần cân đối thêm bao nhiêu.</p>
-        </div>
-        <div class="quick-balance" id="quickBalance"></div>
-        <div class="balance-row">
-          <div><div class="mini-label">Số giao dịch</div><strong id="heroCount">0</strong></div>
-          <div><div class="mini-label">Chênh lệch hiện tại</div><strong id="overallGap">0 VND</strong></div>
-        </div>
+        <p class="drop-title">Kéo thả file Excel vào đây</p>
+        <p class="drop-note">Hoặc bấm để chọn file từ máy tính. Dữ liệu không được tải lên server.</p>
       </div>
     </section>
+    <div id="status" class="status">Chưa có file nào được xử lý.</div>
 
-    <div class="layout">
-      <aside class="sidebar">
-        <section class="panel entry-panel tab-panel" id="entryPanel" data-panel="entry">
-          <div class="sheet-card">
-            <div class="entry-shell-header">
-              <div>
-                <div class="section-kicker">Nhập liệu</div>
-                <h2 id="entryPanelTitle">Thêm khoản đóng góp</h2>
-              </div>
-              <button class="close-icon" type="button" id="closeEntryModalBtn" aria-label="Đóng">×</button>
-            </div>
-            <div class="section-top desktop-only-title"><div><div class="section-kicker">Nhập liệu</div><h2 id="entryDesktopTitle">Thêm khoản đóng góp</h2></div></div>
-            <p class="subtle">Nhập mỗi lần một người bỏ tiền ra cho công việc chung. App sẽ cộng dồn vào tổng đóng góp của người đó.</p>
-            <form id="entryForm">
-              <label>Người đóng tiền<select id="contributor" required></select></label>
-              <div class="grid-two">
-                <label>Số tiền<input id="amount" type="number" min="1000" step="1000" placeholder="Ví dụ: 2.500.000" required></label>
-                <label>Ngày chi<input id="date" type="date" required></label>
-              </div>
-              <label>Hạng mục<select id="category" required><option value="Quảng cáo">Quảng cáo</option><option value="Nhân sự">Nhân sự</option><option value="Vận hành">Vận hành</option><option value="Mặt bằng">Mặt bằng</option><option value="Phần mềm">Phần mềm</option><option value="Khác">Khác</option></select></label>
-              <label>Ghi chú<textarea id="note" placeholder="Ví dụ: Tạm ứng lương nhân viên tháng 6"></textarea></label>
-              <div class="actions">
-                <button class="btn-primary" type="submit" id="submitEntryBtn">Lưu giao dịch</button>
-                <button class="btn-secondary" type="button" id="cancelEditBtn" hidden>Huỷ chỉnh sửa</button>
-                <button class="btn-secondary" type="button" id="exportJsonBtn">Xuất JSON</button>
-                <button class="btn-secondary" type="button" id="exportCsvBtn">Xuất CSV</button>
-              </div>
-            </form>
-            <div class="status" id="formStatus"></div>
-          </div>
-        </section>
-
-        <section class="panel settings-panel tab-panel" data-panel="settings">
-          <div class="section-top"><div><div class="section-kicker">Cài đặt</div><h3>Tên, mục tiêu và dữ liệu</h3></div></div>
-          <div class="grid-two">
-            <label>Người 1<input id="partnerOneName" type="text" maxlength="40" placeholder="Bạn"></label>
-            <label>Người 2<input id="partnerTwoName" type="text" maxlength="40" placeholder="Người bạn"></label>
-          </div>
-          <label>Mục tiêu mỗi người<input id="goalInput" type="number" min="1000000" step="1000000" placeholder="150000000"></label>
-          <label>Ngày đến hạn<input id="deadlineInput" type="date"></label>
-          <div class="actions">
-            <button class="btn-primary" type="button" id="saveSettingsBtn">Lưu cài đặt</button>
-            <button class="btn-secondary" type="button" id="importJsonBtn">Nhập JSON</button>
-            <button class="btn-danger" type="button" id="resetBtn">Xoá toàn bộ dữ liệu</button>
-          </div>
-          <input class="visually-hidden" id="importJsonInput" type="file" accept="application/json,.json">
-        </section>
-      </aside>
-      <main class="main">
-        <section class="panel tab-panel" data-panel="dashboard">
-          <div class="section-top"><div><div class="section-kicker">Tiến độ theo người</div><h2>Mỗi người đã đóng bao nhiêu và còn thiếu bao nhiêu</h2><p>Phần này là trọng tâm chính của app: nhìn phát thấy ngay mức đóng góp và khoảng cách đến mốc.</p></div></div>
-          <div class="summary-grid">
-            <div class="summary-box"><span>Tổng mục tiêu</span><strong id="overallTarget">300.000.000 VND</strong></div>
-            <div class="summary-box"><span>Tổng đã đóng</span><strong id="overallContributed">0 VND</strong></div>
-            <div class="summary-box"><span>Tổng còn thiếu</span><strong id="overallRemaining">300.000.000 VND</strong></div>
-            <div class="summary-box"><span>Tỷ lệ hoàn thành</span><strong id="overallPercent">0%</strong></div>
-          </div>
-          <div class="partner-grid" id="partnerCards"></div>
-          <div class="charts">
-            <div class="chart-card">
-              <div class="section-kicker">Biểu đồ cột</div>
-              <h3>Tiến độ góp vốn của từng người</h3>
-              <p class="subtle">Phần màu đậm là số tiền đã góp, phần màu nhạt là phần còn thiếu để đạt mốc.</p>
-              <svg id="contributionChart" viewBox="0 0 520 290" aria-label="Biểu đồ đóng góp"></svg>
-              <div class="legend">
-                <span class="legend-item"><span class="dot" style="background:#1d5a52"></span>Đã đóng</span>
-                <span class="legend-item"><span class="dot" style="background:#dfe9e3"></span>Còn thiếu</span>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="section-kicker">Biểu đồ tròn</div>
-              <h3>Cơ cấu chi tiêu</h3>
-              <p class="subtle">Màu sắc được tách rõ theo từng nhóm chi phí để đọc nhanh hơn.</p>
-              <svg id="categoryChart" viewBox="0 0 320 290" aria-label="Biểu đồ hạng mục"></svg>
-              <div class="legend" id="categoryLegend"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel tab-panel" data-panel="categories">
-          <div class="section-top"><div><div class="section-kicker">Theo hạng mục</div><h2>Tổng hợp chi phí</h2></div></div>
-          <div id="categoryList" class="category-list"></div>
-          <div id="categoryEmpty" class="empty" hidden>Chưa có giao dịch nào để tổng hợp.</div>
-        </section>
-
-        <section class="panel tab-panel" data-panel="history">
-          <div class="section-top"><div><div class="section-kicker">Lịch sử</div><h2>Danh sách giao dịch</h2><p>Sắp xếp từ mới nhất đến cũ nhất.</p></div></div>
-          <div class="filter-grid" id="historyFilters">
-            <label>Lọc theo người<select id="filterPartner"></select></label>
-            <label>Lọc theo hạng mục<select id="filterCategory"></select></label>
-            <label>Lọc theo tháng<select id="filterMonth"></select></label>
-          </div>
-          <div class="history-meta-row">
-            <div class="filter-count" id="historyCountText">Hiển thị 0 / 0 giao dịch</div>
-          </div>
-          <div id="historyList" class="history-list"></div>
-          <div id="historyEmpty" class="empty" hidden>Chưa có giao dịch nào. Hãy thêm khoản đầu tiên.</div>
-          <p class="footer-note">Dữ liệu được lưu bằng <code>localStorage</code> trên trình duyệt hiện tại.</p>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <button class="fab" type="button" id="fabAdd" aria-label="Thêm giao dịch">+</button>
-
-  <div class="overlay" id="confirmOverlay" aria-hidden="true">
-    <div class="modal-card">
-      <div class="section-kicker" id="confirmKicker">Xác nhận</div>
-      <h3 id="confirmTitle">Xác nhận thao tác</h3>
-      <p id="confirmMessage"></p>
-      <label class="modal-input" id="confirmInputWrap" hidden>Nhập để xác nhận
-        <input id="confirmInput" type="text" autocomplete="off">
-      </label>
-      <div class="modal-error" id="confirmError"></div>
-      <div class="modal-actions">
-        <button class="btn-secondary" type="button" id="confirmCancelBtn">Huỷ</button>
-        <button class="btn-danger" type="button" id="confirmSubmitBtn">Xác nhận</button>
+    <section id="results" class="hidden" aria-live="polite">
+      <div class="toolbar">
+        <label>Từ ngày
+          <input id="dateFrom" type="date" />
+        </label>
+        <label>Đến ngày
+          <input id="dateTo" type="date" />
+        </label>
+        <label>Tìm sản phẩm
+          <input id="productSearch" type="search" placeholder="Nhập tên sản phẩm..." />
+        </label>
+        <div class="action-row">
+          <button id="resetFilters" type="button" class="secondary">Xóa lọc</button>
+          <button id="exportExcel" type="button">Xuất Excel</button>
+          <button id="exportPdf" type="button" class="secondary">Xuất PDF</button>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="toast" id="undoToast" aria-live="polite">
-    <span id="toastMessage">Đã xoá giao dịch.</span>
-    <button type="button" id="toastUndoBtn">Hoàn tác</button>
-  </div>
+      <div class="metrics">
+        <article class="metric">
+          <p class="metric-label">Tổng doanh thu thực nhận</p>
+          <p id="totalRevenue" class="metric-value">0</p>
+          <small>Tổng cột Tổng tiền đã thanh toán ở dòng Order (escrow).</small>
+        </article>
+        <article class="metric">
+          <p class="metric-label">Tổng số đơn đã bán</p>
+          <p id="totalOrders" class="metric-value">0</p>
+          <small>Tổng mã đơn hàng trừ đơn bị hủy/hoàn toàn bộ.</small>
+        </article>
+        <article class="metric">
+          <p class="metric-label">Tổng đơn hoàn</p>
+          <p id="refundOrders" class="metric-value">0</p>
+          <small>Có mã hoàn hoặc tiền hoàn.</small>
+        </article>
+        <article class="metric">
+          <p class="metric-label">Tổng sản phẩm bán</p>
+          <p id="totalProducts" class="metric-value">0</p>
+          <small>Tính từ các dòng Sku.</small>
+        </article>
+        <article class="metric">
+          <p class="metric-label">Tỷ lệ hoàn đơn</p>
+          <p id="refundRate" class="metric-value">0%</p>
+          <small>Đơn hoàn / tổng mã đơn hàng.</small>
+        </article>
+      </div>
 
+      <div class="grid-3">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Doanh thu theo ngày</h2>
+              <p class="panel-sub">Theo ngày đặt hàng.</p>
+            </div>
+          </div>
+          <div id="dailyRevenueChart" class="chart"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Doanh thu theo tháng</h2>
+              <p class="panel-sub">Gộp theo tháng đặt hàng.</p>
+            </div>
+          </div>
+          <div id="monthlyRevenueChart" class="chart"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Đơn hoàn theo tháng</h2>
+              <p class="panel-sub">Đếm đơn hoàn theo tháng.</p>
+            </div>
+          </div>
+          <div id="monthlyRefundChart" class="chart"></div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Thống kê sản phẩm</h2>
+            <p class="panel-sub">Doanh thu escrow phân bổ theo từng đơn, sau đó gộp theo tên chuẩn (Classic, Lỗ nhỏ, Sầu riêng, Quai ngang…).</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="name">Tên sản phẩm</th>
+                <th class="number sortable" data-sort="sold">Đã bán</th>
+                <th class="number sortable" data-sort="refunded">Số lượng hoàn</th>
+                <th class="number sortable" data-sort="revenue">Doanh thu</th>
+                <th class="number">Giá vốn / SP</th>
+                <th class="number sortable" data-sort="profit">Lợi nhuận</th>
+              </tr>
+            </thead>
+            <tbody id="productStatsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="grid-2">
+        <section class="panel controls">
+          <div class="panel-head">
+            <div>
+              <h2>Quản lý sản phẩm</h2>
+              <p class="panel-sub">Gộp nhiều tên sản phẩm về một tên chuẩn. So khớp theo từ khóa chứa trong tên gốc.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="mapping-form">
+              <label>Từ khóa tên gốc
+                <input id="mappingKeyword" type="text" placeholder="Ví dụ: dép sục cross" />
+              </label>
+              <label>Tên chuẩn
+                <input id="mappingCanonical" type="text" placeholder="Ví dụ: Crocs Classic" />
+              </label>
+              <button id="addMapping" type="button">Thêm gộp</button>
+            </div>
+            <div id="mappingList" class="mapping-list"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Báo cáo lợi nhuận</h2>
+              <p class="panel-sub">Lợi nhuận ròng = Doanh thu sau phân bổ escrow − (giá vốn × số lượng bán).</p>
+            </div>
+          </div>
+          <div id="profitByMonthChart" class="chart"></div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Thống kê đơn hoàn</h2>
+            <p class="panel-sub">Danh sách đơn có mã yêu cầu hoàn tiền hoặc số tiền hoàn lại lớn hơn 0.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Ngày đặt</th>
+                <th>Tên sản phẩm</th>
+                <th class="number">Giá trị hoàn</th>
+                <th>Lý do hoàn</th>
+              </tr>
+            </thead>
+            <tbody id="refundStatsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p id="debugInfo" class="debug"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    (() => {
-      "use strict";
+    const REQUIRED_SHEET = "Doanh thu";
+    const EMPTY_VALUES = new Set(["", "-", "--", "nan", "null", "undefined"]);
+    const STORAGE_KEYS = {
+      mappings: "shopeeProductMappings.v2",
+      costs: "shopeeProductCosts.v2",
+    };
 
-      const STORAGE_KEY = "startup-cashflow-tracker-v1";
-      const CHART_COLORS = ["#1d5a52", "#d3a047", "#c26d52", "#5e7fb7", "#7e9b6f", "#8f6ab4"];
-      const CATEGORY_OPTIONS = ["Quảng cáo", "Nhân sự", "Vận hành", "Mặt bằng", "Phần mềm", "Khác"];
-      const DEFAULT_STATE = {
-        goalPerPartner: 150000000,
-        partners: [
-          { id: "p1", name: "Bạn" },
-          { id: "p2", name: "Người bạn" }
-        ],
-        entries: []
+    const DEFAULT_MAPPINGS = [
+      { keyword: "classic", canonical: "Crocs Classic" },
+      { keyword: "sục classic", canonical: "Crocs Classic" },
+      { keyword: "dép sục cross", canonical: "Crocs Classic" },
+      { keyword: "lỗ nhỏ", canonical: "Dép Cross Lỗ Nhỏ" },
+      { keyword: "dép cross lỗ nhỏ", canonical: "Dép Cross Lỗ Nhỏ" },
+      { keyword: "sầu riêng", canonical: "Sầu riêng" },
+      { keyword: "quai ngang", canonical: "Quai ngang" },
+      { keyword: "dép lê quai ngang", canonical: "Quai ngang" },
+    ];
+
+    const state = {
+      sourceFileName: "",
+      analysis: null,
+      filters: { from: "", to: "", search: "" },
+      productSort: { key: "revenue", direction: "desc" },
+      mappings: loadJson(STORAGE_KEYS.mappings, DEFAULT_MAPPINGS),
+      costs: loadJson(STORAGE_KEYS.costs, {}),
+    };
+
+    const els = {
+      dropzone: document.getElementById("dropzone"),
+      fileInput: document.getElementById("fileInput"),
+      status: document.getElementById("status"),
+      results: document.getElementById("results"),
+      dateFrom: document.getElementById("dateFrom"),
+      dateTo: document.getElementById("dateTo"),
+      productSearch: document.getElementById("productSearch"),
+      resetFilters: document.getElementById("resetFilters"),
+      exportExcel: document.getElementById("exportExcel"),
+      exportPdf: document.getElementById("exportPdf"),
+      totalRevenue: document.getElementById("totalRevenue"),
+      totalOrders: document.getElementById("totalOrders"),
+      refundOrders: document.getElementById("refundOrders"),
+      totalProducts: document.getElementById("totalProducts"),
+      refundRate: document.getElementById("refundRate"),
+      dailyRevenueChart: document.getElementById("dailyRevenueChart"),
+      monthlyRevenueChart: document.getElementById("monthlyRevenueChart"),
+      monthlyRefundChart: document.getElementById("monthlyRefundChart"),
+      productStatsBody: document.getElementById("productStatsBody"),
+      refundStatsBody: document.getElementById("refundStatsBody"),
+      mappingKeyword: document.getElementById("mappingKeyword"),
+      mappingCanonical: document.getElementById("mappingCanonical"),
+      addMapping: document.getElementById("addMapping"),
+      mappingList: document.getElementById("mappingList"),
+      profitByMonthChart: document.getElementById("profitByMonthChart"),
+      debugInfo: document.getElementById("debugInfo"),
+    };
+
+    function loadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    // Chuẩn hóa chuỗi để so khớp ổn định: không phân biệt hoa thường, dấu tiếng Việt và khoảng trắng.
+    function normalizeText(value) {
+      return String(value ?? "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/\s+/g, " ");
+    }
+
+    function normalizeKey(value) {
+      return normalizeText(value).replace(/[^a-z0-9]/g, "");
+    }
+
+    function isBlank(value) {
+      return EMPTY_VALUES.has(normalizeText(value));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function toNumber(value) {
+      if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+      const cleaned = String(value ?? "")
+        .replace(/[^\d,.-]/g, "")
+        .replace(/\./g, "")
+        .replace(",", ".");
+      const parsed = Number.parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("vi-VN").format(Math.round(value || 0));
+    }
+
+    function formatQuantity(value) {
+      return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value || 0);
+    }
+
+    function formatMoney(value) {
+      return `${formatNumber(value)} đ`;
+    }
+
+    function formatPercent(value) {
+      return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(value || 0)}%`;
+    }
+
+    function setStatus(message, type = "") {
+      els.status.textContent = message;
+      els.status.className = `status ${type}`.trim();
+    }
+
+    function getCell(row, index) {
+      return index >= 0 ? row[index] : "";
+    }
+
+    function parseDateValue(value) {
+      if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+      if (typeof value === "number" && value > 20000) {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        return new Date(excelEpoch.getTime() + value * 86400000);
+      }
+
+      const text = String(value ?? "").trim();
+      if (!text || text === "-") return null;
+
+      const iso = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+
+      const vn = text.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (vn) return new Date(Number(vn[3]), Number(vn[2]) - 1, Number(vn[1]));
+
+      const parsed = new Date(text);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    function toDateKey(date) {
+      if (!date) return "Không rõ ngày";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function toMonthKey(date) {
+      if (!date) return "Không rõ tháng";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${year}-${month}`;
+    }
+
+    function displayDate(date) {
+      return date ? new Intl.DateTimeFormat("vi-VN").format(date) : "-";
+    }
+
+    function findHeaderRow(rows) {
+      const targetKeys = ["magiaodich", "donhangsanpham", "madonhang", "tensanpham"];
+      for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+        const keys = rows[rowIndex].map(normalizeKey);
+        const matchedCount = targetKeys.filter((key) => keys.includes(key)).length;
+        if (matchedCount >= 3 && keys.includes("donhangsanpham")) return rowIndex;
+      }
+      throw new Error("Không tìm thấy dòng tiêu đề chứa cột Đơn hàng / Sản phẩm trong sheet Doanh thu.");
+    }
+
+    function buildColumnMap(headerRow) {
+      const normalizedHeaders = headerRow.map(normalizeKey);
+      const findColumn = (candidates) => {
+        for (const candidate of candidates) {
+          const index = normalizedHeaders.indexOf(normalizeKey(candidate));
+          if (index >= 0) return index;
+        }
+        return -1;
       };
 
-      const state = loadState();
-      let editingEntryId = null;
-      let pendingDelete = null;
-      let pendingConfirmAction = null;
-      let pendingImportData = null;
-      let currentTab = "dashboard";
-      let currentView = "all";
-      const filters = { partner: "all", category: "all", month: "all" };
+      const map = {
+        rowType: findColumn(["Đơn hàng / Sản phẩm", "Don hang / San pham"]),
+        orderId: findColumn(["Mã đơn hàng", "Ma don hang"]),
+        productName: findColumn(["Tên sản phẩm", "Ten san pham"]),
+        productCode: findColumn(["Mã sản phẩm", "Ma san pham"]),
+        orderDate: findColumn(["Ngày đặt hàng", "Ngay dat hang"]),
+        completeDate: findColumn(["Ngày hoàn thành thanh toán", "Ngay hoan thanh thanh toan"]),
+        revenue: findColumn(["Doanh thu đơn hàng", "Doanh thu", "Tong doanh thu"]),
+        totalPaid: findColumn(["Tổng tiền đã thanh toán", "Tong tien da thanh toan"]),
+        productPrice: findColumn(["Giá sản phẩm", "Gia san pham", "Giá sản phẩm (sau khuyến mãi)", "Gia san pham sau khuyen mai"]),
+        refundCode: findColumn(["Mã yêu cầu hoàn tiền", "Ma yeu cau hoan tien"]),
+        refundAmount: findColumn(["Số tiền hoàn lại", "So tien hoan lai"]),
+        refundReason: findColumn(["Lý do hoàn", "Ly do hoan", "Lý do hoàn tiền", "Ly do hoan tien", "Refund Reason"]),
+        orderStatus: findColumn(["Trạng thái đơn hàng", "Trang thai don hang", "Order Status"]),
+        refundStatus: findColumn(["Trạng thái trả hàng/hoàn tiền", "Trang thai tra hang hoan tien", "Trạng thái hoàn tiền", "Trang thai hoan tien", "Return Refund Status"]),
+        quantity: findColumn(["Số lượng", "So luong", "Số lượng sản phẩm", "So luong san pham"]),
+      };
 
-      const entryForm = document.getElementById("entryForm");
-      const contributor = document.getElementById("contributor");
-      const amount = document.getElementById("amount");
-      const dateInput = document.getElementById("date");
-      const category = document.getElementById("category");
-      const note = document.getElementById("note");
-      const submitEntryBtn = document.getElementById("submitEntryBtn");
-      const cancelEditBtn = document.getElementById("cancelEditBtn");
-      const formStatus = document.getElementById("formStatus");
-      const exportJsonBtn = document.getElementById("exportJsonBtn");
-      const exportCsvBtn = document.getElementById("exportCsvBtn");
-      const entryPanelTitle = document.getElementById("entryPanelTitle");
-      const entryDesktopTitle = document.getElementById("entryDesktopTitle");
-      const closeEntryModalBtn = document.getElementById("closeEntryModalBtn");
-      const fabAdd = document.getElementById("fabAdd");
-      const partnerOneName = document.getElementById("partnerOneName");
-      const partnerTwoName = document.getElementById("partnerTwoName");
-      const goalInput = document.getElementById("goalInput");
-      const deadlineInput = document.getElementById("deadlineInput");
-      const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-      const importJsonBtn = document.getElementById("importJsonBtn");
-      const importJsonInput = document.getElementById("importJsonInput");
-      const resetBtn = document.getElementById("resetBtn");
-      const heroGoal = document.getElementById("heroGoal");
-      const heroRaised = document.getElementById("heroRaised");
-      const heroRemaining = document.getElementById("heroRemaining");
-      const heroCount = document.getElementById("heroCount");
-      const quickBalance = document.getElementById("quickBalance");
-      const overallTarget = document.getElementById("overallTarget");
-      const overallContributed = document.getElementById("overallContributed");
-      const overallRemaining = document.getElementById("overallRemaining");
-      const overallGap = document.getElementById("overallGap");
-      const overallPercent = document.getElementById("overallPercent");
-      const deadlineStat = document.getElementById("deadlineStat");
-      const deadlineText = document.getElementById("deadlineText");
-      const weeklyNeedStat = document.getElementById("weeklyNeedStat");
-      const weeklyNeedText = document.getElementById("weeklyNeedText");
-      const partnerCards = document.getElementById("partnerCards");
-      const contributionChart = document.getElementById("contributionChart");
-      const categoryChart = document.getElementById("categoryChart");
-      const categoryLegend = document.getElementById("categoryLegend");
-      const categoryList = document.getElementById("categoryList");
-      const categoryEmpty = document.getElementById("categoryEmpty");
-      const filterPartner = document.getElementById("filterPartner");
-      const filterCategory = document.getElementById("filterCategory");
-      const filterMonth = document.getElementById("filterMonth");
-      const historyCountText = document.getElementById("historyCountText");
-      const historyList = document.getElementById("historyList");
-      const historyEmpty = document.getElementById("historyEmpty");
-      const tabButtons = Array.from(document.querySelectorAll("[data-tab]"));
-      const tabPanels = Array.from(document.querySelectorAll("[data-panel]"));
-      const viewButtons = Array.from(document.querySelectorAll("[data-view]"));
-      const confirmOverlay = document.getElementById("confirmOverlay");
-      const confirmKicker = document.getElementById("confirmKicker");
-      const confirmTitle = document.getElementById("confirmTitle");
-      const confirmMessage = document.getElementById("confirmMessage");
-      const confirmInputWrap = document.getElementById("confirmInputWrap");
-      const confirmInput = document.getElementById("confirmInput");
-      const confirmError = document.getElementById("confirmError");
-      const confirmCancelBtn = document.getElementById("confirmCancelBtn");
-      const confirmSubmitBtn = document.getElementById("confirmSubmitBtn");
-      const undoToast = document.getElementById("undoToast");
-      const toastMessage = document.getElementById("toastMessage");
-      const toastUndoBtn = document.getElementById("toastUndoBtn");
+      if (map.rowType < 0) throw new Error("Thiếu cột Đơn hàng / Sản phẩm.");
+      if (map.orderId < 0) throw new Error("Thiếu cột Mã đơn hàng.");
+      if (map.productName < 0) throw new Error("Thiếu cột Tên sản phẩm.");
+      return map;
+    }
 
-      dateInput.value = todayISO();
-      entryForm.addEventListener("submit", handleEntrySubmit);
-      cancelEditBtn.addEventListener("click", resetEntryForm);
-      exportJsonBtn.addEventListener("click", exportJson);
-      exportCsvBtn.addEventListener("click", exportCsv);
-      saveSettingsBtn.addEventListener("click", saveSettings);
-      importJsonBtn.addEventListener("click", () => importJsonInput.click());
-      importJsonInput.addEventListener("change", handleImportJson);
-      resetBtn.addEventListener("click", confirmResetAllData);
-      fabAdd.addEventListener("click", () => { resetEntryForm(); openEntryModal(); });
-      closeEntryModalBtn.addEventListener("click", closeEntryModal);
-      confirmCancelBtn.addEventListener("click", closeConfirmModal);
-      confirmSubmitBtn.addEventListener("click", handleConfirmSubmit);
-      toastUndoBtn.addEventListener("click", undoLastDelete);
-      filterPartner.addEventListener("change", () => { filters.partner = filterPartner.value; renderHistory(); });
-      filterCategory.addEventListener("change", () => { filters.category = filterCategory.value; renderHistory(); });
-      filterMonth.addEventListener("change", () => { filters.month = filterMonth.value; renderHistory(); });
-      window.addEventListener("keydown", handleEscape);
-      window.addEventListener("resize", handleResize);
-      tabButtons.forEach(button => {
-        button.addEventListener("click", () => setActiveTab(button.getAttribute("data-tab") || "dashboard"));
+    function extractRowsFromSheet(sheet) {
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        raw: false,
+        defval: "",
+        blankrows: false,
       });
-      viewButtons.forEach(button => {
-        button.addEventListener("click", () => setCurrentView(button.getAttribute("data-view") || "all"));
-      });
+      const headerIndex = findHeaderRow(rows);
+      const headers = rows[headerIndex];
+      const columnMap = buildColumnMap(headers);
+      const dataRows = rows.slice(headerIndex + 1).filter((row) => row.some((cell) => !isBlank(cell)));
+      return { headers, columnMap, dataRows, headerIndex };
+    }
 
-      function todayISO() {
-        return new Date().toISOString().slice(0, 10);
-      }
+    function isRealProductName(value) {
+      return !isBlank(value);
+    }
 
-      function roundToHundredThousand(value) {
-        return Math.ceil((value || 0) / 100000) * 100000;
-      }
+    // Dòng tổng đơn: cột Đơn hàng/Sản phẩm = Order hoặc Tên sản phẩm = "-".
+    function isOrderSummaryRow(row, columnMap) {
+      const rowType = normalizeText(getCell(row, columnMap.rowType));
+      const productName = String(getCell(row, columnMap.productName) ?? "").trim();
+      return rowType === "order" || isBlank(productName);
+    }
 
-      function formatMoney(value) {
-        return new Intl.NumberFormat("vi-VN").format(Math.round(value || 0)) + " VND";
-      }
+    function hasRefundSignal(row, columnMap) {
+      const refundStatus = normalizeText(getCell(row, columnMap.refundStatus));
+      const orderStatus = normalizeText(getCell(row, columnMap.orderStatus));
+      const statusText = `${refundStatus} ${orderStatus}`;
 
-      function formatCompactMoney(value) {
-        const amountValue = Math.round(value || 0);
-        if (amountValue >= 1000000) return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(amountValue / 1000000) + " triệu";
-        if (amountValue >= 1000) return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(amountValue / 1000) + " nghìn";
-        return amountValue + " VND";
-      }
-
-      function formatPercent(value) {
-        return `${Math.round(value || 0)}%`;
-      }
-
-      function formatShortDate(value) {
-        if (!value) return "";
-        return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value + "T00:00:00"));
-      }
-
-      function formatMonthLabel(monthKey) {
-        const [year, month] = monthKey.split("-");
-        return `${month}/${year}`;
-      }
-
-      function escapeHtml(value) {
-        return String(value)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#39;");
-      }
-
-      function createId() {
-        return window.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
-      }
-
-      function cloneDefaultState() {
-        return {
-          goalPerPartner: DEFAULT_STATE.goalPerPartner,
-          partners: DEFAULT_STATE.partners.map(partner => ({ ...partner })),
-          entries: []
-        };
-      }
-
-      function loadState() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return { ...cloneDefaultState(), deadline: "" };
-          const parsed = JSON.parse(raw);
-          const base = cloneDefaultState();
-          return {
-            goalPerPartner: Number(parsed.goalPerPartner) > 0 ? Number(parsed.goalPerPartner) : base.goalPerPartner,
-            partners: Array.isArray(parsed.partners) && parsed.partners.length === 2
-              ? parsed.partners.map((partner, index) => ({
-                  id: partner.id || base.partners[index].id,
-                  name: String(partner.name || base.partners[index].name)
-                }))
-              : base.partners,
-            entries: Array.isArray(parsed.entries)
-              ? parsed.entries
-                  .filter(entry => entry && entry.contributorId && Number(entry.amount) > 0 && entry.date)
-                  .map(entry => ({
-                    id: entry.id || createId(),
-                    contributorId: entry.contributorId,
-                    amount: Number(entry.amount),
-                    date: entry.date,
-                    category: entry.category || "Khác",
-                    note: entry.note || ""
-                  }))
-              : [],
-            deadline: typeof parsed.deadline === "string" ? parsed.deadline : ""
-          };
-        } catch (error) {
-          return { ...cloneDefaultState(), deadline: "" };
-        }
-      }
-
-      function saveState() {
-        const payload = {
-          goalPerPartner: state.goalPerPartner,
-          partners: state.partners,
-          entries: state.entries,
-          deadline: state.deadline || ""
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      }
-
-      function commitPendingDeleteIfNeeded() {
-        if (!pendingDelete) return;
-        clearTimeout(pendingDelete.timeoutId);
-        pendingDelete = null;
-        hideToast();
-        saveState();
-      }
-
-      function setStatus(message) {
-        formStatus.textContent = message;
-      }
-
-      function partnerTotal(partnerId) {
-        return getScopedEntries().filter(entry => entry.contributorId === partnerId).reduce((sum, entry) => sum + entry.amount, 0);
-      }
-
-      function computeCategoryTotals() {
-        return getScopedEntries().reduce((acc, entry) => {
-          acc[entry.category] = (acc[entry.category] || 0) + entry.amount;
-          return acc;
-        }, {});
-      }
-
-      function getPartnerProgress() {
-        const allowed = new Set(getScopedPartnerIds());
-        return state.partners.filter(partner => allowed.has(partner.id)).map((partner, index) => {
-          const contributed = partnerTotal(partner.id);
-          const remaining = Math.max(state.goalPerPartner - contributed, 0);
-          const over = Math.max(contributed - state.goalPerPartner, 0);
-          const percent = state.goalPerPartner > 0 ? Math.min((contributed / state.goalPerPartner) * 100, 100) : 0;
-          return { ...partner, index, contributed, remaining, over, percent };
-        });
-      }
-
-      function getMonthOptions() {
-        const unique = [...new Set(getScopedEntries().map(entry => entry.date.slice(0, 7)))];
-        return unique.sort((a, b) => b.localeCompare(a));
-      }
-
-      function getFilteredEntries() {
-        return [...getScopedEntries()]
-          .filter(entry => filters.partner === "all" || entry.contributorId === filters.partner)
-          .filter(entry => filters.category === "all" || entry.category === filters.category)
-          .filter(entry => filters.month === "all" || entry.date.startsWith(filters.month))
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
-      }
-
-      function isMobile() {
-        return window.innerWidth <= 768;
-      }
-
-      function getScopedPartnerIds() {
-        if (currentView === "all") return state.partners.map(partner => partner.id);
-        return [currentView];
-      }
-
-      function getScopedEntries() {
-        const allowed = new Set(getScopedPartnerIds());
-        return state.entries.filter(entry => allowed.has(entry.contributorId));
-      }
-
-      function setActiveTab(tabId) {
-        if (isMobile() && tabId === "entry") {
-          resetEntryForm();
-          openEntryModal();
-          return;
-        }
-        currentTab = tabId;
-        tabButtons.forEach(button => button.classList.toggle("is-active", button.getAttribute("data-tab") === currentTab));
-        tabPanels.forEach(panel => {
-          const panelId = panel.getAttribute("data-panel");
-          panel.hidden = panelId !== currentTab;
-        });
-        if (isMobile()) window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
-      function setCurrentView(viewId) {
-        currentView = viewId;
-        viewButtons.forEach(button => button.classList.toggle("is-active", button.getAttribute("data-view") === currentView));
-        if (currentView === "all") {
-          filters.partner = "all";
-        } else {
-          filters.partner = currentView;
-        }
-        render();
-      }
-
-      function openEntryModal() {
-        if (!isMobile()) return;
-        document.body.classList.add("entry-modal-open");
-      }
-
-      function closeEntryModal() {
-        document.body.classList.remove("entry-modal-open");
-      }
-
-      function handleResize() {
-        if (!isMobile()) closeEntryModal();
-      }
-
-      function handleEscape(event) {
-        if (event.key !== "Escape") return;
-        closeConfirmModal();
-        closeEntryModal();
-      }
-
-      function updateFormMode() {
-        const isEditing = Boolean(editingEntryId);
-        submitEntryBtn.textContent = isEditing ? "Cập nhật giao dịch" : "Lưu giao dịch";
-        cancelEditBtn.hidden = !isEditing;
-        entryPanelTitle.textContent = isEditing ? "Chỉnh sửa giao dịch" : "Thêm khoản đóng góp";
-        entryDesktopTitle.textContent = entryPanelTitle.textContent;
-      }
-
-      function resetEntryForm() {
-        editingEntryId = null;
-        entryForm.reset();
-        dateInput.value = todayISO();
-        category.value = CATEGORY_OPTIONS[0];
-        renderContributorOptions();
-        updateFormMode();
-        setStatus("");
-      }
-
-      function fillEntryForm(entry) {
-        contributor.value = entry.contributorId;
-        amount.value = String(entry.amount);
-        dateInput.value = entry.date;
-        category.value = entry.category;
-        note.value = entry.note || "";
-      }
-
-      function handleEntrySubmit(event) {
-        event.preventDefault();
-        commitPendingDeleteIfNeeded();
-        const contributorId = contributor.value;
-        const rawAmount = Number(amount.value);
-        const entryDate = dateInput.value;
-        const entryCategory = category.value;
-        const entryNote = note.value.trim();
-
-        if (!contributorId || !entryDate || !entryCategory || !Number.isFinite(rawAmount) || rawAmount <= 0) {
-          setStatus("Nhập đủ thông tin hợp lệ trước khi lưu.");
-          return;
-        }
-
-        if (editingEntryId) {
-          const entry = state.entries.find(item => item.id === editingEntryId);
-          if (!entry) {
-            setStatus("Không tìm thấy giao dịch để cập nhật.");
-            resetEntryForm();
-            render();
-            return;
-          }
-          entry.contributorId = contributorId;
-          entry.amount = rawAmount;
-          entry.date = entryDate;
-          entry.category = entryCategory;
-          entry.note = entryNote;
-          saveState();
-          render();
-          resetEntryForm();
-          setStatus("Đã cập nhật giao dịch.");
-        } else {
-          state.entries.unshift({ id: createId(), contributorId, amount: rawAmount, date: entryDate, category: entryCategory, note: entryNote });
-          saveState();
-          render();
-          resetEntryForm();
-          setStatus("Đã lưu giao dịch mới.");
-        }
-
-        if (isMobile()) closeEntryModal();
-      }
-      function startEditing(entryId) {
-        const entry = state.entries.find(item => item.id === entryId);
-        if (!entry) return;
-        editingEntryId = entryId;
-        fillEntryForm(entry);
-        updateFormMode();
-        setStatus("Đang chỉnh sửa giao dịch.");
-        openEntryModal();
-      }
-
-      function downloadFile(filename, content, type) {
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(url);
-      }
-
-      function exportJson() {
-        commitPendingDeleteIfNeeded();
-        const exportState = {
-          goalPerPartner: state.goalPerPartner,
-          partners: state.partners,
-          entries: state.entries,
-          deadline: state.deadline || ""
-        };
-        downloadFile("dong-gop-khoi-nghiep.json", JSON.stringify(exportState, null, 2), "application/json");
-        setStatus("Đã xuất file JSON.");
-      }
-
-      function exportCsv() {
-        commitPendingDeleteIfNeeded();
-        const header = ["Ngày", "Người đóng", "Số tiền (VND)", "Hạng mục", "Ghi chú"];
-        const rows = state.entries.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).map(entry => {
-          const partner = state.partners.find(item => item.id === entry.contributorId);
-          return [entry.date, partner ? partner.name : "", String(entry.amount), entry.category, entry.note || ""];
-        });
-        const csv = [header, ...rows].map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\r\n");
-        const fileName = `dong-gop-khoi-nghiep-${todayISO()}.csv`;
-        downloadFile(fileName, "\uFEFF" + csv, "text/csv;charset=utf-8;");
-        setStatus("Đã xuất file CSV.");
-      }
-
-      function saveSettings() {
-        commitPendingDeleteIfNeeded();
-        const firstName = partnerOneName.value.trim() || "Bạn";
-        const secondName = partnerTwoName.value.trim() || "Người bạn";
-        const goal = Number(goalInput.value);
-        if (!Number.isFinite(goal) || goal <= 0) {
-          setStatus("Mục tiêu mỗi người phải lớn hơn 0.");
-          return;
-        }
-        state.partners[0].name = firstName;
-        state.partners[1].name = secondName;
-        state.goalPerPartner = goal;
-        state.deadline = deadlineInput.value || "";
-        saveState();
-        render();
-        setStatus("Đã cập nhật cài đặt.");
-      }
-
-      function validateImportPayload(payload) {
-        if (!payload || typeof payload !== "object") return false;
-        if (!Number.isFinite(Number(payload.goalPerPartner)) || Number(payload.goalPerPartner) <= 0) return false;
-        if (!Array.isArray(payload.partners) || payload.partners.length !== 2) return false;
-        if (!Array.isArray(payload.entries)) return false;
+      if (statusText.includes("tra hang") || statusText.includes("hoan tien") || statusText.includes("refund")) {
         return true;
       }
 
-      function handleImportJson(event) {
-        const file = event.target.files && event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const payload = JSON.parse(String(reader.result || "{}"));
-            if (!validateImportPayload(payload)) {
-              setStatus("File không đúng định dạng. Vui lòng chọn file JSON đã xuất từ app này.");
-              importJsonInput.value = "";
-              return;
-            }
-            pendingImportData = payload;
-            openConfirmModal({
-              kicker: "Nhập dữ liệu",
-              title: "Ghi đè dữ liệu hiện tại?",
-              message: "Nhập sẽ ghi đè dữ liệu hiện tại. Tiếp tục?",
-              confirmLabel: "Nhập dữ liệu",
-              danger: false,
-              onConfirm: applyImportedData
-            });
-          } catch (error) {
-            setStatus("File không đúng định dạng. Vui lòng chọn file JSON đã xuất từ app này.");
-            importJsonInput.value = "";
+      const refundAmount = toNumber(getCell(row, columnMap.refundAmount));
+      if (refundAmount > 0) return true;
+
+      const revenue = toNumber(getCell(row, columnMap.revenue));
+      if (revenue < 0) return true;
+
+      const totalPaid = toNumber(getCell(row, columnMap.totalPaid));
+      if (totalPaid < 0) return true;
+
+      return !isBlank(getCell(row, columnMap.refundCode));
+    }
+
+    function hasCancelSignal(row, columnMap) {
+      const statusText = normalizeText([
+        getCell(row, columnMap.orderStatus),
+        getCell(row, columnMap.refundStatus),
+      ].join(" "));
+      return statusText.includes("huy")
+        || statusText.includes("cancel")
+        || statusText.includes("huy bo");
+    }
+
+    function getRefundAmount(row, columnMap) {
+      return Math.max(0, toNumber(getCell(row, columnMap.refundAmount)));
+    }
+
+    function normalizeProductName(rawName) {
+      const name = String(rawName ?? "").trim();
+      if (isBlank(name)) return "";
+      const normalizedName = normalizeText(name);
+      const match = state.mappings.find((item) => normalizedName.includes(normalizeText(item.keyword)));
+      return match ? match.canonical.trim() : name;
+    }
+
+    // Escrow distribution: phân bổ [Tổng thực nhận đơn] theo tỷ trọng Giá sản phẩm từng dòng Sku.
+    function finalizeOrderEscrow(order) {
+      const grossPaid = order.totalPaid;
+      const refundAmount = Math.max(0, order.refundAmount);
+      order.isFullyRefunded = order.isRefund && grossPaid > 0 && refundAmount >= grossPaid;
+      order.isFullyVoided = order.isFullyRefunded || (order.isCanceled && grossPaid === 0);
+      const escrowTotal = order.isFullyVoided ? 0 : grossPaid;
+      order.netRevenue = escrowTotal;
+
+      const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+      const totalListedPrice = order.items.reduce((sum, item) => sum + item.listedPrice, 0);
+      const skuCount = order.items.length;
+      let remainingRefundQuantity = order.isFullyVoided ? totalQuantity : 0;
+
+      if (!order.isFullyVoided && order.isRefund && grossPaid > 0 && refundAmount > 0) {
+        remainingRefundQuantity = Math.min(totalQuantity, refundAmount / grossPaid * totalQuantity);
+      }
+
+      order.items.forEach((item) => {
+        const listedShare = totalListedPrice > 0
+          ? item.listedPrice / totalListedPrice
+          : 1 / Math.max(1, skuCount);
+        const itemRefundByRow = item.isRefund ? item.quantity : 0;
+        const itemRefundByOrder = remainingRefundQuantity * listedShare;
+        const refundedQuantity = Math.min(item.quantity, Math.max(itemRefundByRow, itemRefundByOrder));
+        item.refundedQuantity = refundedQuantity;
+        item.soldQuantity = order.isFullyVoided ? 0 : Math.max(0, item.quantity - refundedQuantity);
+      });
+
+      order.items.forEach((item) => {
+        if (order.isFullyVoided) {
+          item.revenue = 0;
+          return;
+        }
+        const weight = totalListedPrice > 0
+          ? item.listedPrice / totalListedPrice
+          : 1 / Math.max(1, skuCount);
+        item.revenue = weight * escrowTotal;
+      });
+
+      if (!order.isFullyVoided && skuCount > 0) {
+        const allocated = order.items.reduce((sum, item) => sum + item.revenue, 0);
+        const remainder = escrowTotal - allocated;
+        if (remainder !== 0) {
+          order.items[skuCount - 1].revenue += remainder;
+        }
+      }
+
+      order.unallocatedRevenue = order.isFullyVoided || skuCount > 0 ? 0 : escrowTotal;
+      return order;
+    }
+
+    function analyzeShopeeIncome(workbook) {
+      const sheetName = workbook.SheetNames.find((name) => normalizeText(name) === normalizeText(REQUIRED_SHEET));
+      if (!sheetName) {
+        throw new Error(`Không tìm thấy sheet "${REQUIRED_SHEET}". File cần có sheet Doanh thu.`);
+      }
+
+      const { headers, columnMap, dataRows, headerIndex } = extractRowsFromSheet(workbook.Sheets[sheetName]);
+      const orderMap = new Map();
+      const orderItems = [];
+
+      for (const row of dataRows) {
+        const orderId = String(getCell(row, columnMap.orderId) ?? "").trim();
+        if (!orderId) continue;
+
+        if (!orderMap.has(orderId)) {
+          orderMap.set(orderId, {
+            orderId,
+            orderRow: null,
+            items: [],
+            date: null,
+            completeDate: null,
+            totalPaid: 0,
+            refundAmount: 0,
+            refundCode: "",
+            refundReason: "",
+            isRefund: false,
+            isCanceled: false,
+            isFullyRefunded: false,
+            isFullyVoided: false,
+            netRevenue: 0,
+          });
+        }
+
+        const order = orderMap.get(orderId);
+        const rowDate = parseDateValue(getCell(row, columnMap.orderDate));
+        const rowCompleteDate = parseDateValue(getCell(row, columnMap.completeDate));
+        const rowRefundAmount = getRefundAmount(row, columnMap);
+        const rowRefundCode = String(getCell(row, columnMap.refundCode) ?? "").trim();
+        const rowRefundReason = String(getCell(row, columnMap.refundReason) ?? "").trim();
+
+        if (!order.date && rowDate) order.date = rowDate;
+        if (!order.completeDate && rowCompleteDate) order.completeDate = rowCompleteDate;
+        if (rowRefundAmount > order.refundAmount) order.refundAmount = rowRefundAmount;
+        if (!isBlank(rowRefundCode)) order.refundCode = rowRefundCode;
+        if (!isBlank(rowRefundReason)) order.refundReason = rowRefundReason;
+        if (hasRefundSignal(row, columnMap)) order.isRefund = true;
+        if (hasCancelSignal(row, columnMap)) order.isCanceled = true;
+
+        if (isOrderSummaryRow(row, columnMap)) {
+          order.orderRow = row;
+          // Doanh thu đơn chỉ lấy từ cột Tổng tiền đã thanh toán ở dòng tổng ("-").
+          order.totalPaid = toNumber(getCell(row, columnMap.totalPaid));
+        } else {
+          const rawProductName = String(getCell(row, columnMap.productName) ?? "").trim();
+          if (isRealProductName(rawProductName)) {
+            const item = {
+              itemId: `${orderId}-${order.items.length + 1}`,
+              orderId,
+              rawName: rawProductName,
+              canonicalName: normalizeProductName(rawProductName),
+              productCode: String(getCell(row, columnMap.productCode) ?? "").trim(),
+              quantity: columnMap.quantity >= 0 ? Math.max(1, toNumber(getCell(row, columnMap.quantity))) : 1,
+              listedPrice: Math.max(0, toNumber(getCell(row, columnMap.productPrice))),
+              refundAmount: rowRefundAmount,
+              isRefund: hasRefundSignal(row, columnMap),
+              soldQuantity: 0,
+              refundedQuantity: 0,
+              revenue: 0,
+            };
+            order.items.push(item);
+            orderItems.push(item);
           }
-        };
-        reader.readAsText(file, "utf-8");
-      }
-
-      function applyImportedData() {
-        if (!pendingImportData) return;
-        commitPendingDeleteIfNeeded();
-        const payload = pendingImportData;
-        state.goalPerPartner = Number(payload.goalPerPartner);
-        state.partners = payload.partners.map((partner, index) => ({
-          id: partner.id || DEFAULT_STATE.partners[index].id,
-          name: String(partner.name || DEFAULT_STATE.partners[index].name)
-        }));
-        state.entries = payload.entries.filter(entry => entry && entry.contributorId && Number(entry.amount) > 0 && entry.date).map(entry => ({
-          id: entry.id || createId(),
-          contributorId: entry.contributorId,
-          amount: Number(entry.amount),
-          date: entry.date,
-          category: entry.category || "Khác",
-          note: entry.note || ""
-        }));
-        state.deadline = typeof payload.deadline === "string" ? payload.deadline : "";
-        pendingImportData = null;
-        importJsonInput.value = "";
-        saveState();
-        resetEntryForm();
-        render();
-        setStatus("Đã nhập dữ liệu từ JSON.");
-      }
-
-      function confirmResetAllData() {
-        openConfirmModal({
-          kicker: "Xoá dữ liệu",
-          title: "Xoá toàn bộ dữ liệu?",
-          message: "Thao tác này sẽ xoá toàn bộ giao dịch và cài đặt. Hãy gõ “XOÁ” để xác nhận.",
-          confirmLabel: "Xoá toàn bộ",
-          danger: true,
-          requireText: "XOÁ",
-          onConfirm: () => {
-            pendingImportData = null;
-            if (pendingDelete) clearTimeout(pendingDelete.timeoutId);
-            pendingDelete = null;
-            hideToast();
-            state.goalPerPartner = DEFAULT_STATE.goalPerPartner;
-            state.partners = DEFAULT_STATE.partners.map(partner => ({ ...partner }));
-            state.entries = [];
-            state.deadline = "";
-            saveState();
-            resetEntryForm();
-            render();
-            setStatus("Đã xoá toàn bộ dữ liệu.");
-          }
-        });
-      }
-
-      function openConfirmModal(config) {
-        pendingConfirmAction = config;
-        confirmKicker.textContent = config.kicker || "Xác nhận";
-        confirmTitle.textContent = config.title || "Xác nhận thao tác";
-        confirmMessage.textContent = config.message || "";
-        confirmSubmitBtn.textContent = config.confirmLabel || "Xác nhận";
-        confirmSubmitBtn.className = config.danger ? "btn-danger" : "btn-primary";
-        confirmInputWrap.hidden = !config.requireText;
-        confirmInput.value = "";
-        confirmError.textContent = "";
-        confirmOverlay.classList.add("is-open");
-        document.body.classList.add("modal-open");
-        if (config.requireText) confirmInput.focus();
-      }
-
-      function closeConfirmModal() {
-        confirmOverlay.classList.remove("is-open");
-        document.body.classList.remove("modal-open");
-        confirmError.textContent = "";
-        pendingConfirmAction = null;
-      }
-
-      function handleConfirmSubmit() {
-        if (!pendingConfirmAction) return;
-        if (pendingConfirmAction.requireText && confirmInput.value.trim() !== pendingConfirmAction.requireText) {
-          confirmError.textContent = `Bạn cần nhập chính xác “${pendingConfirmAction.requireText}”.`;
-          return;
         }
-        const action = pendingConfirmAction.onConfirm;
-        closeConfirmModal();
-        if (typeof action === "function") action();
-      }
-      function showToast(message, undoVisible = true) {
-        toastMessage.textContent = message;
-        toastUndoBtn.hidden = !undoVisible;
-        undoToast.classList.add("is-open");
       }
 
-      function hideToast() {
-        undoToast.classList.remove("is-open");
-      }
+      const orders = Array.from(orderMap.values()).map(finalizeOrderEscrow);
 
-      function deleteEntryWithUndo(entryId) {
-        commitPendingDeleteIfNeeded();
-        const index = state.entries.findIndex(entry => entry.id === entryId);
-        if (index === -1) return;
-        const [removedEntry] = state.entries.splice(index, 1);
-        pendingDelete = {
-          entry: removedEntry,
-          index,
-          timeoutId: window.setTimeout(() => {
-            pendingDelete = null;
-            hideToast();
-            saveState();
-            render();
-          }, 5000)
-        };
-        render();
-        showToast("Đã xoá giao dịch — Hoàn tác?", true);
-      }
+      const minDate = orders.reduce((min, order) => order.date && (!min || order.date < min) ? order.date : min, null);
+      const maxDate = orders.reduce((max, order) => order.date && (!max || order.date > max) ? order.date : max, null);
 
-      function undoLastDelete() {
-        if (!pendingDelete) return;
-        clearTimeout(pendingDelete.timeoutId);
-        state.entries.splice(Math.min(pendingDelete.index, state.entries.length), 0, pendingDelete.entry);
-        pendingDelete = null;
-        hideToast();
-        saveState();
-        render();
-        setStatus("Đã hoàn tác giao dịch vừa xoá.");
-      }
+      return {
+        orders,
+        orderItems,
+        meta: {
+          sheetName,
+          headerRowNumber: headerIndex + 1,
+          dataRowCount: dataRows.length,
+          headersFound: headers.filter((cell) => !isBlank(cell)).length,
+          minDate,
+          maxDate,
+        },
+      };
+    }
 
-      function renderContributorOptions() {
-        const current = contributor.value;
-        const visiblePartners = currentView === "all"
-          ? state.partners
-          : state.partners.filter(partner => partner.id === currentView);
-        contributor.innerHTML = "";
-        visiblePartners.forEach(partner => {
-          const option = document.createElement("option");
-          option.value = partner.id;
-          option.textContent = partner.name;
-          contributor.appendChild(option);
-        });
-        contributor.value = visiblePartners.some(partner => partner.id === current) ? current : visiblePartners[0].id;
-        contributor.disabled = currentView !== "all";
-      }
+    function isInDateRange(order) {
+      const dateKey = toDateKey(order.date);
+      if (state.filters.from && dateKey < state.filters.from) return false;
+      if (state.filters.to && dateKey > state.filters.to) return false;
+      return true;
+    }
 
-      function renderSettings() {
-        partnerOneName.value = state.partners[0].name;
-        partnerTwoName.value = state.partners[1].name;
-        const viewBtnP1 = document.getElementById("viewBtnP1");
-        const viewBtnP2 = document.getElementById("viewBtnP2");
-        if (viewBtnP1) viewBtnP1.textContent = state.partners[0].name;
-        if (viewBtnP2) viewBtnP2.textContent = state.partners[1].name;
-        goalInput.value = String(state.goalPerPartner);
-        deadlineInput.value = state.deadline || "";
-      }
+    function getFilteredOrders() {
+      if (!state.analysis) return [];
+      return state.analysis.orders.filter(isInDateRange);
+    }
 
-      function renderHistoryFilters() {
-        const partnerValue = filters.partner;
-        const categoryValue = filters.category;
-        const monthValue = filters.month;
-        const visiblePartners = currentView === "all"
-          ? state.partners
-          : state.partners.filter(partner => partner.id === currentView);
-        filterPartner.innerHTML = `<option value="all">Tất cả người đóng</option>${visiblePartners.map(partner => `<option value="${partner.id}">${escapeHtml(partner.name)}</option>`).join("")}`;
-        filterCategory.innerHTML = `<option value="all">Tất cả hạng mục</option>${CATEGORY_OPTIONS.map(item => `<option value="${item}">${item}</option>`).join("")}`;
-        filterMonth.innerHTML = `<option value="all">Tất cả tháng</option>${getMonthOptions().map(month => `<option value="${month}">${formatMonthLabel(month)}</option>`).join("")}`;
-        filterPartner.value = Array.from(filterPartner.options).some(option => option.value === partnerValue) ? partnerValue : "all";
-        filterCategory.value = Array.from(filterCategory.options).some(option => option.value === categoryValue) ? categoryValue : "all";
-        filterMonth.value = Array.from(filterMonth.options).some(option => option.value === monthValue) ? monthValue : "all";
-        filters.partner = filterPartner.value;
-        filters.category = filterCategory.value;
-        filters.month = filterMonth.value;
-        filterPartner.disabled = currentView !== "all";
-      }
+    function addProductStat(summary, product, monthKey) {
+      const name = product.canonicalName || product.rawName;
+      const current = summary.productStats.get(name) || {
+        name,
+        sold: 0,
+        refunded: 0,
+        revenue: 0,
+        cost: Number(state.costs[name] || 0),
+        profit: 0,
+      };
 
-      function getDeadlineState(totalRemaining) {
-        if (!state.deadline) {
-          return { label: "Chưa đặt", weeklyNeedLabel: "0 VND", isOverdue: false };
+      current.sold += product.soldQuantity;
+      current.refunded += product.refundedQuantity;
+      current.revenue += product.revenue;
+      current.cost = Number(state.costs[name] || 0);
+      const unitCost = Number(state.costs[name] || 0);
+      current.profit = current.revenue - unitCost * current.sold;
+      summary.productStats.set(name, current);
+      summary.totalProducts += product.soldQuantity;
+      addToMap(summary.profitByMonth, monthKey, product.revenue - unitCost * product.soldQuantity);
+    }
+
+    function summarize(orders) {
+      const summary = {
+        totalRevenue: 0,
+        totalOrders: 0,
+        refundOrders: 0,
+        totalProducts: 0,
+        dailyRevenue: new Map(),
+        monthlyRevenue: new Map(),
+        monthlyRefunds: new Map(),
+        productStats: new Map(),
+        refunds: [],
+        profitByMonth: new Map(),
+      };
+
+      for (const order of orders) {
+        const dayKey = toDateKey(order.date);
+        const monthKey = toMonthKey(order.date);
+        const netRevenue = order.netRevenue;
+
+        if (!order.isFullyVoided) summary.totalOrders += 1;
+        summary.totalRevenue += netRevenue;
+        addToMap(summary.dailyRevenue, dayKey, netRevenue);
+        addToMap(summary.monthlyRevenue, monthKey, netRevenue);
+
+        if (order.isRefund) {
+          summary.refundOrders += 1;
+          addToMap(summary.monthlyRefunds, monthKey, 1);
+          summary.refunds.push({
+            orderId: order.orderId,
+            date: order.date,
+            products: order.items.map((item) => item.canonicalName).join(", "),
+            refundAmount: order.refundAmount,
+            reason: order.refundReason || "-",
+          });
         }
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const deadlineDate = new Date(state.deadline + "T00:00:00");
-        const diffDays = Math.ceil((deadlineDate - today) / 86400000);
-        if (diffDays < 0) {
-          return {
-            label: `Đã quá hạn ${Math.abs(diffDays)} ngày`,
-            weeklyNeedLabel: totalRemaining > 0 ? "Đã quá hạn" : "0 VND",
-            isOverdue: true
-          };
+
+        for (const product of order.items) {
+          addProductStat(summary, product, monthKey);
         }
-        const weeksLeft = Math.max(diffDays / 7, 1 / 7);
-        const weeklyNeed = totalRemaining > 0 ? roundToHundredThousand(totalRemaining / weeksLeft) : 0;
-        return {
-          label: `Còn ${diffDays} ngày`,
-          weeklyNeedLabel: formatMoney(weeklyNeed),
-          isOverdue: false
-        };
+
+        if (order.unallocatedRevenue) {
+          addProductStat(summary, {
+            canonicalName: "Phí & điều chỉnh (không có dòng SKU)",
+            rawName: "Phí & điều chỉnh (không có dòng SKU)",
+            soldQuantity: 0,
+            refundedQuantity: 0,
+            revenue: order.unallocatedRevenue,
+          }, monthKey);
+        }
       }
 
-      function renderOverview(progressData) {
-        const scopedEntries = getScopedEntries();
-        const scopedPartnerCount = getScopedPartnerIds().length;
-        const totalContributed = progressData.reduce((sum, item) => sum + item.contributed, 0);
-        const totalTarget = state.goalPerPartner * scopedPartnerCount;
-        const totalRemaining = Math.max(totalTarget - totalContributed, 0);
-        const completion = totalTarget > 0 ? (totalContributed / totalTarget) * 100 : 0;
-        const gap = progressData.length === 2 ? Math.abs(progressData[0].contributed - progressData[1].contributed) : 0;
-        const deadlineState = getDeadlineState(totalRemaining);
-        heroGoal.textContent = formatMoney(state.goalPerPartner);
-        heroRaised.textContent = formatMoney(totalContributed);
-        heroRemaining.textContent = formatMoney(totalRemaining);
-        heroCount.textContent = String(scopedEntries.length);
-        overallTarget.textContent = formatMoney(totalTarget);
-        overallContributed.textContent = formatMoney(totalContributed);
-        overallRemaining.textContent = formatMoney(totalRemaining);
-        overallGap.textContent = formatMoney(gap);
-        overallPercent.textContent = formatPercent(completion);
-        deadlineText.textContent = deadlineState.label;
-        weeklyNeedText.textContent = deadlineState.weeklyNeedLabel;
-        deadlineStat.classList.toggle("is-danger", deadlineState.isOverdue);
-        weeklyNeedStat.classList.toggle("is-danger", deadlineState.isOverdue && totalRemaining > 0);
-        quickBalance.innerHTML = "";
-        progressData.forEach(item => {
-          const row = document.createElement("div");
-          row.className = "balance-row";
-          row.innerHTML = `<div><div class="mini-label">${escapeHtml(item.name)}</div><strong>${formatMoney(item.contributed)}</strong></div><div><div class="mini-label">Còn thiếu</div><strong>${formatMoney(item.remaining)}</strong></div>`;
-          quickBalance.appendChild(row);
-        });
-      }
+      summary.refundRate = orders.length ? (summary.refundOrders / orders.length) * 100 : 0;
+      return summary;
+    }
 
-      function renderPartnerCards(progressData) {
-        partnerCards.innerHTML = "";
-        progressData.forEach(item => {
-          const card = document.createElement("article");
-          card.className = "partner-card";
-          card.dataset.tone = String(item.index);
-          card.innerHTML = `
-            <div class="partner-head">
-              <div>
-                <div class="partner-name">${escapeHtml(item.name)}</div>
-                <div class="partner-sub">Mục tiêu: ${formatMoney(state.goalPerPartner)}</div>
-              </div>
-              <div class="partner-percent">${item.percent.toFixed(1)}%</div>
-            </div>
-            <div>
-              <div class="mini-label">Đã đóng</div>
-              <div class="partner-big">${formatCompactMoney(item.contributed)}</div>
-            </div>
-            <div class="progress"><div style="width:${item.percent}%"></div></div>
-            <div class="partner-detail-grid">
-              <div class="metric"><span>Còn thiếu</span><strong>${formatCompactMoney(item.remaining)}</strong></div>
-              <div class="metric"><span>Vượt mục tiêu</span><strong>${formatCompactMoney(item.over)}</strong></div>
-              <div class="metric"><span>Trạng thái</span><strong>${item.remaining === 0 ? "Đạt mốc" : "Chưa đủ"}</strong></div>
-            </div>
-          `;
-          partnerCards.appendChild(card);
-        });
-      }
-      function renderContributionChart(progressData) {
-        const maxGoal = state.goalPerPartner || 1;
-        const chartHeight = 180;
-        const baseY = 236;
-        const barWidth = 92;
-        const positions = [90, 290];
-        const grid = [0, 0.5, 1].map(step => {
-          const y = baseY - chartHeight * step;
-          return `<line x1="56" y1="${y}" x2="486" y2="${y}" stroke="${step === 0 ? '#bfd1c7' : '#e3ece7'}" stroke-width="${step === 0 ? 2 : 1.2}" stroke-dasharray="${step === 0 ? '0' : '4 6'}"></line>`;
-        }).join("");
+    function addToMap(map, key, value) {
+      map.set(key, (map.get(key) || 0) + value);
+    }
 
-        const bars = progressData.map((item, index) => {
-          const contributedHeight = Math.max((Math.min(item.contributed, maxGoal) / maxGoal) * chartHeight, 0);
-          const remainingHeight = Math.max((item.remaining / maxGoal) * chartHeight, 0);
-          const x = positions[index] || (90 + index * 200);
-          const yContributed = baseY - contributedHeight;
-          const yRemaining = yContributed - remainingHeight;
-          const tone = index === 0 ? ["#1d5a52", "#2f756c"] : ["#d3a047", "#b9842f"];
-          const gradientId = `barGradient${index}`;
-          return `
-            <defs>
-              <linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="${tone[1]}"></stop>
-                <stop offset="100%" stop-color="${tone[0]}"></stop>
-              </linearGradient>
-            </defs>
-            <text x="${x + barWidth / 2}" y="274" text-anchor="middle" font-size="13" font-weight="600" fill="#495d56">${escapeHtml(item.name)}</text>
-            <text x="${x + barWidth / 2}" y="${Math.max(28, yRemaining - 12)}" text-anchor="middle" font-size="12" fill="#66756f">${escapeHtml(formatCompactMoney(item.contributed))}</text>
-            <rect x="${x}" y="${yRemaining}" width="${barWidth}" height="${remainingHeight}" rx="18" fill="#dfe9e3"></rect>
-            <rect x="${x}" y="${yContributed}" width="${barWidth}" height="${contributedHeight}" rx="18" fill="url(#${gradientId})"></rect>
-          `;
-        }).join("");
+    function mapToRows(map) {
+      return Array.from(map.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([label, value]) => ({ label, value }));
+    }
 
-        contributionChart.innerHTML = `
-          <rect x="24" y="18" width="472" height="248" rx="26" fill="#ffffff" opacity="0.45"></rect>
-          ${grid}
-          <line x1="56" y1="236" x2="486" y2="236" stroke="#bfd1c7" stroke-width="2"></line>
-          <text x="44" y="58" text-anchor="end" font-size="12" fill="#66756f">${formatCompactMoney(maxGoal)}</text>
-          <text x="44" y="150" text-anchor="end" font-size="12" fill="#66756f">${formatCompactMoney(maxGoal / 2)}</text>
-          <text x="44" y="240" text-anchor="end" font-size="12" fill="#66756f">0</text>
-          ${bars}
+    function renderChart(container, rows, formatter = formatMoney, mode = "") {
+      const safeRows = rows.length ? rows : [{ label: "Không có dữ liệu", value: 0 }];
+      const max = Math.max(1, ...safeRows.map((row) => row.value));
+      container.innerHTML = safeRows.map((row) => {
+        const width = Math.round((row.value / max) * 100);
+        return `
+          <div class="bar-row">
+            <div class="bar-label" title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</div>
+            <div class="bar-track">
+              <div class="bar-fill ${mode}" style="width: ${width}%"></div>
+            </div>
+            <div class="bar-value">${formatter(row.value)}</div>
+          </div>
         `;
+      }).join("");
+    }
+
+    function renderAll() {
+      if (!state.analysis) return;
+      const orders = getFilteredOrders();
+      const summary = summarize(orders);
+      const productRows = getVisibleProductRows(summary);
+
+      els.totalRevenue.textContent = formatMoney(summary.totalRevenue);
+      els.totalOrders.textContent = formatNumber(summary.totalOrders);
+      els.refundOrders.textContent = formatNumber(summary.refundOrders);
+      els.totalProducts.textContent = formatQuantity(summary.totalProducts);
+      els.refundRate.textContent = formatPercent(summary.refundRate);
+
+      renderChart(els.dailyRevenueChart, mapToRows(summary.dailyRevenue).slice(-18), formatMoney);
+      renderChart(els.monthlyRevenueChart, mapToRows(summary.monthlyRevenue), formatMoney, "alt");
+      renderChart(els.monthlyRefundChart, mapToRows(summary.monthlyRefunds), formatNumber, "danger");
+      renderChart(els.profitByMonthChart, mapToRows(summary.profitByMonth), formatMoney, "alt");
+      renderProductTable(productRows);
+      renderRefundTable(summary.refunds);
+      renderMappings();
+
+      els.debugInfo.innerHTML = `Đã đọc sheet <code>${state.analysis.meta.sheetName}</code>, dòng header ${state.analysis.meta.headerRowNumber}, ${formatNumber(state.analysis.meta.dataRowCount)} dòng dữ liệu, gom thành ${formatNumber(state.analysis.orders.length)} mã đơn hàng (${formatNumber(state.analysis.orderItems.length)} dòng sản phẩm, bỏ qua dòng "-").`;
+      els.results.classList.remove("hidden");
+    }
+
+    function getVisibleProductRows(summary) {
+      const search = normalizeText(state.filters.search);
+      const rows = Array.from(summary.productStats.values())
+        .filter((row) => !search || normalizeText(row.name).includes(search));
+
+      const { key, direction } = state.productSort;
+      rows.sort((a, b) => {
+        const aValue = a[key];
+        const bValue = b[key];
+        const compare = typeof aValue === "string"
+          ? aValue.localeCompare(bValue)
+          : Number(aValue || 0) - Number(bValue || 0);
+        return direction === "asc" ? compare : -compare;
+      });
+      return rows;
+    }
+
+    function renderProductTable(rows) {
+      els.productStatsBody.innerHTML = rows.map((row) => `
+        <tr>
+          <td>${escapeHtml(row.name)}</td>
+          <td class="number">${formatQuantity(row.sold)}</td>
+          <td class="number">${formatQuantity(row.refunded)}</td>
+          <td class="number">${formatMoney(row.revenue)}</td>
+          <td class="number">
+            <input data-cost-product="${escapeHtml(row.name)}" type="number" min="0" step="1000" value="${Number(state.costs[row.name] || 0)}" aria-label="Giá vốn ${escapeHtml(row.name)}" />
+          </td>
+          <td class="number">${formatMoney(row.profit)}</td>
+        </tr>
+      `).join("");
+
+      els.productStatsBody.querySelectorAll("[data-cost-product]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const productName = input.getAttribute("data-cost-product");
+          state.costs[productName] = Math.max(0, toNumber(input.value));
+          saveJson(STORAGE_KEYS.costs, state.costs);
+          renderAll();
+        });
+      });
+    }
+
+    function renderRefundTable(rows) {
+      els.refundStatsBody.innerHTML = rows.map((row) => `
+        <tr>
+          <td>${escapeHtml(row.orderId)}</td>
+          <td>${escapeHtml(displayDate(row.date))}</td>
+          <td>${escapeHtml(row.products || "-")}</td>
+          <td class="number">${formatMoney(row.refundAmount)}</td>
+          <td>${escapeHtml(row.reason || "-")}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderMappings() {
+      els.mappingList.innerHTML = state.mappings.map((item, index) => `
+        <div class="mapping-item">
+          <div><strong>${escapeHtml(item.keyword)}</strong></div>
+          <div>${escapeHtml(item.canonical)}</div>
+          <button type="button" class="danger" data-delete-mapping="${index}">Xóa</button>
+        </div>
+      `).join("");
+
+      els.mappingList.querySelectorAll("[data-delete-mapping]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.mappings.splice(Number(button.getAttribute("data-delete-mapping")), 1);
+          saveJson(STORAGE_KEYS.mappings, state.mappings);
+          if (state.analysis) state.analysis = rebuildWithCurrentMappings(state.analysis);
+          renderAll();
+        });
+      });
+    }
+
+    function rebuildWithCurrentMappings(analysis) {
+      analysis.orders.forEach((order) => {
+        order.items.forEach((product) => {
+          product.canonicalName = normalizeProductName(product.rawName);
+        });
+      });
+      return analysis;
+    }
+
+    function setupDateDefaults(meta) {
+      els.dateFrom.value = meta.minDate ? toDateKey(meta.minDate) : "";
+      els.dateTo.value = meta.maxDate ? toDateKey(meta.maxDate) : "";
+      state.filters.from = els.dateFrom.value;
+      state.filters.to = els.dateTo.value;
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+
+      const validName = /^Income\.đã phát hành\.vn\..*\.xlsx$/i.test(file.name);
+      if (!validName) {
+        setStatus("Tên file không đúng cấu trúc Income.đã phát hành.vn.*.xlsx.", "error");
+        return;
       }
 
-      function renderCategoryChart(categoryTotals) {
-        const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).slice(0, 6);
-        const total = entries.reduce((sum, [, value]) => sum + value, 0);
-        if (!entries.length || total <= 0) {
-          categoryChart.innerHTML = `<circle cx="160" cy="128" r="78" fill="#edf3f0"></circle><circle cx="160" cy="128" r="44" fill="#ffffff"></circle><text x="160" y="134" text-anchor="middle" font-size="14" fill="#66756f">Chưa có dữ liệu</text>`;
-          categoryLegend.innerHTML = "";
-          return;
+      if (!window.XLSX) {
+        setStatus("Không tải được thư viện đọc Excel. Hãy kiểm tra kết nối Internet rồi tải lại trang.", "error");
+        return;
+      }
+
+      const startedAt = performance.now();
+      setStatus(`Đang xử lý ${file.name}...`);
+      els.results.classList.add("hidden");
+
+      try {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array", cellDates: false });
+        state.sourceFileName = file.name;
+        state.analysis = analyzeShopeeIncome(workbook);
+        setupDateDefaults(state.analysis.meta);
+        renderAll();
+        const elapsedMs = Math.round(performance.now() - startedAt);
+        setStatus(`Xử lý xong trong ${elapsedMs} ms.`, "ok");
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || "Không thể xử lý file Excel.", "error");
+      }
+    }
+
+    function exportExcelReport() {
+      if (!state.analysis || !window.XLSX) return;
+      const summary = summarize(getFilteredOrders());
+      const productRows = getVisibleProductRows(summary);
+      const topRows = [...productRows].sort((a, b) => b.sold - a.sold).slice(0, 30);
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(mapToRows(summary.monthlyRevenue).map((row) => ({
+        "Tháng": row.label,
+        "Doanh thu": Math.round(row.value),
+      }))), "Doanh thu");
+
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(summary.refunds.map((row) => ({
+        "Mã đơn": row.orderId,
+        "Ngày đặt": displayDate(row.date),
+        "Tên sản phẩm": row.products,
+        "Giá trị hoàn": Math.round(row.refundAmount),
+        "Lý do hoàn": row.reason,
+      }))), "Đơn hoàn");
+
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(topRows.map((row) => ({
+        "Tên sản phẩm": row.name,
+        "Đã bán": Number(row.sold.toFixed(2)),
+        "Số lượng hoàn": Number(row.refunded.toFixed(2)),
+        "Doanh thu": Math.round(row.revenue),
+      }))), "Top sản phẩm");
+
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(productRows.map((row) => ({
+        "Tên sản phẩm": row.name,
+        "Đã bán": Number(row.sold.toFixed(2)),
+        "Số lượng hoàn": Number(row.refunded.toFixed(2)),
+        "Doanh thu": Math.round(row.revenue),
+        "Giá vốn / SP": Math.round(row.cost),
+        "Lợi nhuận": Math.round(row.profit),
+      }))), "Lợi nhuận");
+
+      XLSX.writeFile(workbook, `Shopee_Report_${toDateKey(new Date())}.xlsx`);
+    }
+
+    function exportPdfReport() {
+      if (!state.analysis) return;
+      const summary = summarize(getFilteredOrders());
+      const products = getVisibleProductRows(summary).slice(0, 40);
+      const html = `
+        <!doctype html>
+        <html lang="vi">
+        <head>
+          <meta charset="utf-8" />
+          <title>Báo cáo Shopee</title>
+          <style>
+            body { font-family: Arial, sans-serif; color: #17202a; margin: 28px; }
+            h1 { margin: 0 0 8px; }
+            p { color: #64748b; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+            th, td { border: 1px solid #d9e0ea; padding: 8px; font-size: 12px; text-align: left; }
+            th { background: #f1f5f9; }
+            .number { text-align: right; }
+            .metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 18px 0; }
+            .metric { border: 1px solid #d9e0ea; padding: 10px; }
+            .label { color: #64748b; font-size: 11px; }
+            .value { font-size: 18px; font-weight: 700; }
+          </style>
+        </head>
+        <body>
+          <h1>Báo cáo Shopee Income</h1>
+          <p>File: ${escapeHtml(state.sourceFileName)} | Khoảng ngày: ${escapeHtml(state.filters.from || "-")} đến ${escapeHtml(state.filters.to || "-")}</p>
+          <div class="metrics">
+            <div class="metric"><div class="label">Doanh thu</div><div class="value">${formatMoney(summary.totalRevenue)}</div></div>
+            <div class="metric"><div class="label">Đơn đã bán</div><div class="value">${formatNumber(summary.totalOrders)}</div></div>
+            <div class="metric"><div class="label">Đơn hoàn</div><div class="value">${formatNumber(summary.refundOrders)}</div></div>
+            <div class="metric"><div class="label">Sản phẩm bán</div><div class="value">${formatQuantity(summary.totalProducts)}</div></div>
+            <div class="metric"><div class="label">Tỷ lệ hoàn</div><div class="value">${formatPercent(summary.refundRate)}</div></div>
+          </div>
+          <h2>Top sản phẩm</h2>
+          <table>
+            <thead><tr><th>Tên sản phẩm</th><th class="number">Đã bán</th><th class="number">Số lượng hoàn</th><th class="number">Doanh thu</th><th class="number">Lợi nhuận</th></tr></thead>
+            <tbody>
+              ${products.map((row) => `<tr><td>${escapeHtml(row.name)}</td><td class="number">${formatQuantity(row.sold)}</td><td class="number">${formatQuantity(row.refunded)}</td><td class="number">${formatMoney(row.revenue)}</td><td class="number">${formatMoney(row.profit)}</td></tr>`).join("")}
+            </tbody>
+          </table>
+          <h2>Đơn hoàn</h2>
+          <table>
+            <thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Tên sản phẩm</th><th class="number">Giá trị hoàn</th><th>Lý do</th></tr></thead>
+            <tbody>
+              ${summary.refunds.map((row) => `<tr><td>${escapeHtml(row.orderId)}</td><td>${escapeHtml(displayDate(row.date))}</td><td>${escapeHtml(row.products)}</td><td class="number">${formatMoney(row.refundAmount)}</td><td>${escapeHtml(row.reason)}</td></tr>`).join("")}
+            </tbody>
+          </table>
+          <script>window.onload = () => window.print();<\/script>
+        </body>
+        </html>
+      `;
+      const reportWindow = window.open("", "_blank");
+      if (!reportWindow) {
+        setStatus("Trình duyệt đang chặn cửa sổ xuất PDF. Hãy cho phép popup rồi thử lại.", "error");
+        return;
+      }
+      reportWindow.document.write(html);
+      reportWindow.document.close();
+    }
+
+    els.fileInput.addEventListener("change", (event) => {
+      handleFile(event.target.files[0]);
+      event.target.value = "";
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      els.dropzone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        els.dropzone.classList.add("is-dragging");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      els.dropzone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        els.dropzone.classList.remove("is-dragging");
+      });
+    });
+
+    els.dropzone.addEventListener("drop", (event) => {
+      handleFile(event.dataTransfer.files[0]);
+    });
+
+    els.dateFrom.addEventListener("change", () => {
+      state.filters.from = els.dateFrom.value;
+      renderAll();
+    });
+
+    els.dateTo.addEventListener("change", () => {
+      state.filters.to = els.dateTo.value;
+      renderAll();
+    });
+
+    els.productSearch.addEventListener("input", () => {
+      state.filters.search = els.productSearch.value;
+      renderAll();
+    });
+
+    els.resetFilters.addEventListener("click", () => {
+      state.filters.search = "";
+      els.productSearch.value = "";
+      setupDateDefaults(state.analysis.meta);
+      renderAll();
+    });
+
+    document.querySelectorAll("th.sortable").forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.getAttribute("data-sort");
+        if (state.productSort.key === key) {
+          state.productSort.direction = state.productSort.direction === "asc" ? "desc" : "asc";
+        } else {
+          state.productSort.key = key;
+          state.productSort.direction = key === "name" ? "asc" : "desc";
         }
+        renderAll();
+      });
+    });
 
-        let startAngle = -Math.PI / 2;
-        const cx = 160;
-        const cy = 128;
-        const radius = 82;
-        const innerRadius = 44;
-        const slices = [];
-        const legends = [];
-
-        entries.forEach(([name, value], index) => {
-          const angle = (value / total) * Math.PI * 2;
-          const endAngle = startAngle + angle;
-          const largeArcFlag = angle > Math.PI ? 1 : 0;
-          const x1 = cx + Math.cos(startAngle) * radius;
-          const y1 = cy + Math.sin(startAngle) * radius;
-          const x2 = cx + Math.cos(endAngle) * radius;
-          const y2 = cy + Math.sin(endAngle) * radius;
-          const ix1 = cx + Math.cos(endAngle) * innerRadius;
-          const iy1 = cy + Math.sin(endAngle) * innerRadius;
-          const ix2 = cx + Math.cos(startAngle) * innerRadius;
-          const iy2 = cy + Math.sin(startAngle) * innerRadius;
-          const color = CHART_COLORS[index % CHART_COLORS.length];
-          slices.push(`<path d="M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} L ${ix1} ${iy1} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${ix2} ${iy2} Z" fill="${color}" stroke="#ffffff" stroke-width="3"></path>`);
-          legends.push(`<span class="legend-item"><span class="dot" style="background:${color}"></span>${escapeHtml(name)} - ${Math.round((value / total) * 100)}%</span>`);
-          startAngle = endAngle;
-        });
-
-        categoryChart.innerHTML = `
-          <circle cx="${cx}" cy="${cy}" r="100" fill="#ffffff" opacity="0.55"></circle>
-          ${slices.join("")}
-          <circle cx="${cx}" cy="${cy}" r="${innerRadius - 1}" fill="#ffffff"></circle>
-          <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="12" fill="#66756f">Tổng chi</text>
-          <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="18" font-weight="700" fill="#142320">${escapeHtml(formatCompactMoney(total))}</text>
-        `;
-        categoryLegend.innerHTML = legends.join("");
+    els.addMapping.addEventListener("click", () => {
+      const keyword = els.mappingKeyword.value.trim();
+      const canonical = els.mappingCanonical.value.trim();
+      if (!keyword || !canonical) {
+        setStatus("Hãy nhập đủ từ khóa tên gốc và tên chuẩn.", "error");
+        return;
       }
+      state.mappings.unshift({ keyword, canonical });
+      saveJson(STORAGE_KEYS.mappings, state.mappings);
+      els.mappingKeyword.value = "";
+      els.mappingCanonical.value = "";
+      if (state.analysis) state.analysis = rebuildWithCurrentMappings(state.analysis);
+      renderAll();
+      setStatus("Đã thêm quy tắc gộp sản phẩm.", "ok");
+    });
 
-      function renderCategories(categoryTotals) {
-        categoryList.innerHTML = "";
-        const items = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
-        const total = items.reduce((sum, [, value]) => sum + value, 0);
-        categoryEmpty.hidden = items.length > 0;
-        items.forEach(([name, value], index) => {
-          const percent = total > 0 ? (value / total) * 100 : 0;
-          const item = document.createElement("div");
-          item.className = "category-item";
-          item.innerHTML = `<div class="category-top"><strong>${escapeHtml(name)}</strong><strong>${formatMoney(value)}</strong></div><div class="subtle">${formatPercent(percent)} tổng chi</div><div class="bar-track"><div class="bar-fill" style="width:${percent}%; background: linear-gradient(90deg, ${CHART_COLORS[index % CHART_COLORS.length]}, var(--brand-2));"></div></div>`;
-          categoryList.appendChild(item);
-        });
-      }
+    els.exportExcel.addEventListener("click", exportExcelReport);
+    els.exportPdf.addEventListener("click", exportPdfReport);
 
-      function renderHistory() {
-        renderHistoryFilters();
-        historyList.innerHTML = "";
-        const scopedEntries = getScopedEntries();
-        const filteredEntries = getFilteredEntries();
-        historyCountText.textContent = `Hiển thị ${filteredEntries.length} / ${scopedEntries.length} giao dịch`;
-        if (!scopedEntries.length) {
-          historyEmpty.textContent = "Chưa có giao dịch nào. Hãy thêm khoản đầu tiên.";
-          historyEmpty.hidden = false;
-          return;
-        }
-        if (!filteredEntries.length) {
-          historyEmpty.textContent = "Không tìm thấy giao dịch phù hợp.";
-          historyEmpty.hidden = false;
-          return;
-        }
-        historyEmpty.hidden = true;
-        filteredEntries.forEach(entry => {
-          const partner = state.partners.find(item => item.id === entry.contributorId);
-          const item = document.createElement("article");
-          item.className = "history-item";
-          item.innerHTML = `
-            <div class="history-top">
-              <div>
-                <div class="amount">${formatMoney(entry.amount)}</div>
-                <div class="history-meta">
-                  <span class="tag">${escapeHtml(partner ? partner.name : "Không rõ")}</span>
-                  <span class="tag">${escapeHtml(entry.category)}</span>
-                  <span>${formatShortDate(entry.date)}</span>
-                </div>
-              </div>
-            </div>
-            <p>${entry.note ? escapeHtml(entry.note) : "Không có ghi chú."}</p>
-            <div class="history-actions">
-              <button class="btn-secondary" type="button" data-edit="${entry.id}">Sửa</button>
-              <button class="btn-danger" type="button" data-delete="${entry.id}">Xoá</button>
-            </div>
-          `;
-          historyList.appendChild(item);
-        });
-        historyList.querySelectorAll("[data-edit]").forEach(button => {
-          button.addEventListener("click", () => startEditing(button.getAttribute("data-edit")));
-        });
-        historyList.querySelectorAll("[data-delete]").forEach(button => {
-          button.addEventListener("click", () => deleteEntryWithUndo(button.getAttribute("data-delete")));
-        });
-      }
+    renderMappings();
 
-      function render() {
-        setActiveTab(currentTab);
-        renderContributorOptions();
-        renderSettings();
-        updateFormMode();
-        const progressData = getPartnerProgress();
-        const categoryTotals = computeCategoryTotals();
-        renderOverview(progressData);
-        renderPartnerCards(progressData);
-        renderContributionChart(progressData);
-        renderCategoryChart(categoryTotals);
-        renderCategories(categoryTotals);
-        renderHistory();
-      }
-
-      render();
-    })();
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
